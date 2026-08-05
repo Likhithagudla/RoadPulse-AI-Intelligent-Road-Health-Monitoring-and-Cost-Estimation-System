@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoadPulse AI - Detection Results</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0a0e1a;
+            color: #e0e6f0;
+            padding: 2rem;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #00e5ff, #7c4dff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            text-align: center;
+            color: #8892b0;
+            margin-bottom: 2rem;
+        }
+        .stats {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 1.2rem 2rem;
+            text-align: center;
+            min-width: 160px;
+        }
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00e5ff;
+        }
+        .stat-card .label {
+            font-size: 0.85rem;
+            color: #8892b0;
+            margin-top: 0.3rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+        .card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .card:hover { transform: translateY(-4px); border-color: #00e5ff44; }
+        .card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .card-info {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-name { font-weight: 600; }
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .badge.found { background: rgba(0,229,255,0.15); color: #00e5ff; }
+        .badge.none { background: rgba(255,255,255,0.05); color: #5a6380; }
+    </style>
+</head>
+<body>
+    <h1>RoadPulse AI - Detection Results</h1>
+    <p class="subtitle">YOLOv8 Pothole Detection Test Results</p>
+
+    <div class="stats">
+        <div class="stat-card"><div class="value">34</div><div class="label">Test Images</div></div>
+        <div class="stat-card"><div class="value">72</div><div class="label">Potholes Found</div></div>
+        <div class="stat-card"><div class="value">34</div><div class="label">Images with Detections</div></div>
+        <div class="stat-card"><div class="value">66%</div><div class="label">Avg Confidence</div></div>
+    </div>
+    <div class="grid">
+
+        <div class="card">
+            <img src="detections/img-104.jpg" alt="img-104.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-104.jpg</span>
+                <span class="badge found">2 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-121.jpg" alt="img-121.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-121.jpg</span>
+                <span class="badge found">4 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-123.jpg" alt="img-123.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-123.jpg</span>
+                <span class="badge found">2 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-126.jpg" alt="img-126.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-126.jpg</span>
+                <span class="badge found">2 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-128.jpg" alt="img-128.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-128.jpg</span>
+                <span class="badge found">1 pothole</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-18.jpg" alt="img-18.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-18.jpg</span>
+                <span class="badge found">5 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-185.jpg" alt="img-185.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-185.jpg</span>
+                <span class="badge found">1 pothole</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-193.jpg" alt="img-193.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-193.jpg</span>
+                <span class="badge found">1 pothole</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-201.jpg" alt="img-201.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-201.jpg</span>
+                <span class="badge found">2 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-227.jpg" alt="img-227.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-227.jpg</span>
+                <span class="badge found">2 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-242.jpg" alt="img-242.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-242.jpg</span>
+                <span class="badge found">1 pothole</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-246.jpg" alt="img-246.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-246.jpg</span>
+                <span class="badge found">2 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-282.jpg" alt="img-282.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-282.jpg</span>
+                <span class="badge found">2 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-30.jpg" alt="img-30.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-30.jpg</span>
+                <span class="badge found">2 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-301.jpg" alt="img-301.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-301.jpg</span>
+                <span class="badge found">2 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-304.jpg" alt="img-304.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-304.jpg</span>
+                <span class="badge found">1 pothole</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-313.jpg" alt="img-313.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-313.jpg</span>
+                <span class="badge found">1 pothole</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-324.jpg" alt="img-324.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-324.jpg</span>
+                <span class="badge found">1 pothole</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-352.jpg" alt="img-352.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-352.jpg</span>
+                <span class="badge found">4 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-355.jpg" alt="img-355.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-355.jpg</span>
+                <span class="badge found">1 pothole</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-412.jpg" alt="img-412.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-412.jpg</span>
+                <span class="badge found">1 pothole</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-486.jpg" alt="img-486.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-486.jpg</span>
+                <span class="badge found">7 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-489.jpg" alt="img-489.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-489.jpg</span>
+                <span class="badge found">2 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-512.jpg" alt="img-512.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-512.jpg</span>
+                <span class="badge found">4 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-565.jpg" alt="img-565.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-565.jpg</span>
+                <span class="badge found">1 pothole</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-601.jpg" alt="img-601.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-601.jpg</span>
+                <span class="badge found">2 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-616.jpg" alt="img-616.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-616.jpg</span>
+                <span class="badge found">3 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-642.jpg" alt="img-642.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-642.jpg</span>
+                <span class="badge found">3 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-643.jpg" alt="img-643.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-643.jpg</span>
+                <span class="badge found">2 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-654.jpg" alt="img-654.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-654.jpg</span>
+                <span class="badge found">2 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-74.jpg" alt="img-74.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-74.jpg</span>
+                <span class="badge found">1 pothole</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-89.jpg" alt="img-89.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-89.jpg</span>
+                <span class="badge found">2 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-9.jpg" alt="img-9.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-9.jpg</span>
+                <span class="badge found">2 potholes</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="detections/img-91.jpg" alt="img-91.jpg" loading="lazy">
+            <div class="card-info">
+                <span class="card-name">img-91.jpg</span>
+                <span class="badge found">1 pothole</span>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,20 @@
+names:
+  0: Pothole
+  1: Edge_Deterioration
+  2: Alligator_Cracking
+  3: Rutting
+  4: Subsidence
+  5: Cracking
+  6: Bleeding
+  7: Fretting
+  8: Repaired_Pothole
+  9: Line_Marking
+  10: Storm_Drain
+  11: Manhole
+  12: Guard_Rail
+  13: Traffic_Sign
+nc: 14
+path: D:/Road_AI_Project/ai_models/dataset/unified
+test: images/test
+train: images/train
+val: images/val

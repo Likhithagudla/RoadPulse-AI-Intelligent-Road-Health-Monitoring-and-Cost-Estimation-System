@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+pydantic
+python-multipart
+python-dotenv
+aiofiles
+pyyaml
+ultralytics
+opencv-python
+python-jose[cryptography]
+passlib[bcrypt]

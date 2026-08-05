@@ -1,0 +1,22 @@
+{
+  "model_name": "Road Defect Detector",
+  "format": "ONNX",
+  "input_size": 640,
+  "classes": {
+    "0": "Pothole",
+    "1": "Edge_Deterioration",
+    "2": "Alligator_Cracking",
+    "3": "Rutting",
+    "4": "Subsidence",
+    "5": "Cracking",
+    "6": "Bleeding",
+    "7": "Fretting",
+    "8": "Repaired_Pothole",
+    "9": "Line_Marking",
+    "10": "Storm_Drain",
+    "11": "Manhole",
+    "12": "Guard_Rail",
+    "13": "Traffic_Sign"
+  },
+  "exported_at": "2026-03-05T11:19:20.313910"
+}

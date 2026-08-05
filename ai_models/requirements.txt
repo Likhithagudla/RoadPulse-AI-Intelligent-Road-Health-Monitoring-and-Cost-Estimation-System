@@ -1,0 +1,30 @@
+# ============================================================
+# Road AI - AI Models Dependencies
+# ============================================================
+
+# Core AI Framework
+ultralytics>=8.1.0      # YOLOv8 framework
+torch>=2.0.0            # PyTorch deep learning
+torchvision>=0.15.0     # Vision utilities
+
+# Image Processing
+opencv-python>=4.8.0    # Computer vision
+Pillow>=10.0.0          # Image handling
+albumentations>=1.3.0   # Data augmentation
+
+# Data & Utilities
+numpy>=1.24.0
+pandas>=2.0.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+pyyaml>=6.0
+tqdm>=4.65.0
+scikit-learn>=1.3.0
+
+# Dataset Management
+roboflow>=1.1.0
+kaggle>=1.5.0
+
+# ONNX Export (for deployment)
+onnx>=1.14.0
+onnxruntime>=1.15.0

@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>RoadPulse AI — Smart City Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+    <!-- ═══════════════════════════ LOGIN ═══════════════════════════ -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-bg">
+            <div class="login-bg-grid"></div>
+            <div class="login-bg-glow glow-1"></div>
+            <div class="login-bg-glow glow-2"></div>
+            <div class="login-bg-glow glow-3"></div>
+        </div>
+        <div class="login-card">
+            <div class="login-brand">
+                <div class="login-logo">
+                    <svg width="38" height="38" viewBox="0 0 40 40" fill="none">
+                        <path d="M5 30L20 5L35 30" stroke="url(#lg1)" stroke-width="3" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path d="M12 22H28" stroke="url(#lg1)" stroke-width="2.5" stroke-linecap="round" />
+                        <path d="M9 27H31" stroke="url(#lg1)" stroke-width="2.5" stroke-linecap="round" />
+                        <circle cx="20" cy="15" r="3" fill="url(#lg1)" />
+                        <defs>
+                            <linearGradient id="lg1" x1="5" y1="5" x2="35" y2="35">
+                                <stop offset="0%" stop-color="#22d3ee" />
+                                <stop offset="100%" stop-color="#818cf8" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="login-title">RoadPulse <span class="accent-text">AI</span></h1>
+                    <p class="login-subtitle">Smart City Infrastructure Platform</p>
+                </div>
+            </div>
+            <div id="login-error" class="login-error" style="display:none"></div>
+            <div class="form-field">
+                <label>Username</label>
+                <div class="input-icon-wrap">
+                    <i data-lucide="user" class="input-icon"></i>
+                    <input type="text" id="login-username" placeholder="admin / worker / user1"
+                        autocomplete="username" />
+                </div>
+            </div>
+            <div class="form-field">
+                <label>Password</label>
+                <div class="input-icon-wrap">
+                    <i data-lucide="lock" class="input-icon"></i>
+                    <input type="password" id="login-password" placeholder="Enter your password"
+                        autocomplete="current-password" />
+                    <button class="input-eye" id="toggle-pw" type="button" tabindex="-1"><i
+                            data-lucide="eye"></i></button>
+                </div>
+            </div>
+            <button class="login-btn" id="login-btn">
+                <span id="login-btn-text">Sign In</span>
+                <div class="login-spinner" id="login-spinner" style="display:none"></div>
+            </button>
+            <div class="login-divider"><span>or continue as</span></div>
+            <button class="login-anon-btn" id="anon-btn"><i data-lucide="map-pin"></i> Continue as Anonymous (Public
+                View)</button>
+            <div class="login-hints">
+                <p>Quick fill demo accounts:</p>
+                <div class="hint-chips">
+                    <button class="hint-chip" data-user="admin" data-pass="admin123"><span
+                            class="hint-role admin-chip">ADMIN</span>admin / admin123</button>
+                    <button class="hint-chip" data-user="worker" data-pass="worker123"><span
+                            class="hint-role worker-chip">WORKER</span>worker / worker123</button>
+                    <button class="hint-chip" data-user="user1" data-pass="user123"><span
+                            class="hint-role user-chip">USER</span>user1 / user123</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════ APP ═══════════════════════════ -->
+    <div id="app" class="app" style="display:none">
+
+        <!-- SIDEBAR -->
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon-wrap">
+                    <svg width="26" height="26" viewBox="0 0 40 40" fill="none">
+                        <path d="M5 30L20 5L35 30" stroke="url(#slg)" stroke-width="3.5" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path d="M12 22H28" stroke="url(#slg)" stroke-width="2.5" stroke-linecap="round" />
+                        <path d="M9 27H31" stroke="url(#slg)" stroke-width="2.5" stroke-linecap="round" />
+                        <defs>
+                            <linearGradient id="slg" x1="5" y1="5" x2="35" y2="35">
+                                <stop offset="0%" stop-color="#22d3ee" />
+                                <stop offset="100%" stop-color="#818cf8" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="brand-text-wrap"><span class="brand-name">RoadPulse</span><span
+                        class="brand-badge">AI</span></div>
+            </div>
+
+            <!-- Admin-only: Live Detection first -->
+            <div class="sidebar-section-label admin-only" id="admin-section-label" style="display:none">Admin Tools
+            </div>
+            <nav class="sidebar-nav admin-only" id="admin-nav" style="display:none">
+                <button class="nav-item" data-page="live-detection">
+                    <i data-lucide="scan-line"></i><span>Live Detection</span>
+                    <span class="nav-live-dot"></span>
+                </button>
+                <button class="nav-item" data-page="issues"><i data-lucide="alert-circle"></i><span>All
+                        Issues</span></button>
+                <button class="nav-item" data-page="workers"><i data-lucide="hard-hat"></i><span>Workers</span></button>
+                <button class="nav-item" data-page="analytics"><i
+                        data-lucide="bar-chart-2"></i><span>Analytics</span></button>
+            </nav>
+
+            <div class="sidebar-section-label">Navigation</div>
+            <nav class="sidebar-nav" id="sidebar-nav">
+                <button class="nav-item" data-page="dashboard"><i
+                        data-lucide="layout-dashboard"></i><span>Dashboard</span></button>
+                <button class="nav-item" data-page="map"><i data-lucide="map"></i><span>Map View</span></button>
+                <button class="nav-item" data-page="reports"><i data-lucide="flag"></i><span>Reports</span></button>
+                <button class="nav-item" data-page="notifications">
+                    <i data-lucide="bell"></i><span>Notifications</span>
+                    <span class="nav-badge" id="sidebar-notif-count" style="display:none">0</span>
+                </button>
+                <button class="nav-item" data-page="settings"><i
+                        data-lucide="settings"></i><span>Settings</span></button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-live-status">
+                    <div class="live-pulse"></div><span id="sidebar-live-text">System Online</span><span
+                        class="live-label">LIVE</span>
+                </div>
+                <div class="user-info-bar">
+                    <div class="user-avatar-small" id="sidebar-avatar">A</div>
+                    <div class="user-info-text">
+                        <span class="user-info-name" id="sidebar-username">Admin</span>
+                        <span class="user-role-pill" id="sidebar-role-pill">admin</span>
+                    </div>
+                </div>
+                <button class="logout-btn" id="sidebar-logout"><i data-lucide="log-out"></i><span>Sign
+                        Out</span></button>
+            </div>
+        </nav>
+
+        <!-- MAIN -->
+        <div class="main-wrap">
+
+            <!-- TOPBAR -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="hamburger" id="hamburger"><i data-lucide="menu"></i></button>
+                    <div class="breadcrumb">
+                        <span class="breadcrumb-root">RoadPulse</span>
+                        <i data-lucide="chevron-right" class="breadcrumb-sep"></i>
+                        <span class="breadcrumb-page" id="topbar-page-title">Dashboard</span>
+                    </div>
+                </div>
+
+                <!-- Global State Filter -->
+                <div class="topbar-center">
+                    <div class="global-state-filter-wrap">
+                        <i data-lucide="map-pin" class="gsf-icon"></i>
+                        <select id="global-state-filter" class="global-state-select">
+                            <option value="">All States</option>
+                            <option>Andhra Pradesh</option>
+                            <option>Arunachal Pradesh</option>
+                            <option>Assam</option>
+                            <option>Bihar</option>
+                            <option>Chandigarh</option>
+                            <option>Chhattisgarh</option>
+                            <option>Delhi</option>
+                            <option>Goa</option>
+                            <option>Gujarat</option>
+                            <option>Haryana</option>
+                            <option>Himachal Pradesh</option>
+                            <option>Jharkhand</option>
+                            <option>Karnataka</option>
+                            <option>Kerala</option>
+                            <option>Madhya Pradesh</option>
+                            <option>Maharashtra</option>
+                            <option>Manipur</option>
+                            <option>Meghalaya</option>
+                            <option>Nagaland</option>
+                            <option>Odisha</option>
+                            <option>Punjab</option>
+                            <option>Rajasthan</option>
+                            <option>Sikkim</option>
+                            <option>Tamil Nadu</option>
+                            <option>Telangana</option>
+                            <option>Tripura</option>
+                            <option>Uttar Pradesh</option>
+                            <option>Uttarakhand</option>
+                            <option>West Bengal</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="role-badge-topbar" id="role-badge-topbar"><i data-lucide="shield-check"></i><span
+                            id="topbar-role-label">Administrator</span></div>
+                    <button class="topbar-icon-btn" id="theme-toggle" title="Toggle Theme"><i
+                            data-lucide="moon"></i></button>
+
+                    <!-- Notification Bell -->
+                    <div class="notif-wrap">
+                        <button class="topbar-icon-btn" id="notif-bell"><i data-lucide="bell"></i><span
+                                class="notif-dot" id="notif-dot" style="display:none"></span></button>
+                        <div class="notif-dropdown" id="notif-dropdown" style="display:none">
+                            <div class="notif-header"><span>Notifications</span><button id="mark-all-read">Mark all
+                                    read</button></div>
+                            <div class="notif-list" id="notif-list"></div>
+                            <div class="notif-footer"><button onclick="window.navigateTo('notifications')"
+                                    class="notif-view-all">View all notifications →</button></div>
+                        </div>
+                    </div>
+
+                    <!-- Profile -->
+                    <div class="profile-wrap">
+                        <button class="profile-trigger" id="profile-trigger">
+                            <div class="user-avatar-top" id="topbar-avatar">A</div>
+                            <i data-lucide="chevron-down" class="profile-arrow"></i>
+                        </button>
+                        <div class="profile-dropdown" id="profile-dropdown" style="display:none">
+                            <div class="profile-info">
+                                <span class="profile-name" id="profile-name">Admin User</span>
+                                <span class="profile-email" id="profile-email">admin@roadpulse.ai</span>
+                                <span class="profile-role-tag" id="profile-role-tag">Administrator</span>
+                            </div>
+                            <hr class="profile-sep" />
+                            <button class="profile-item" data-page="settings"><i data-lucide="settings"></i>
+                                Settings</button>
+                            <button class="profile-item" data-page="notifications"><i data-lucide="bell"></i>
+                                Notifications</button>
+                            <hr class="profile-sep" />
+                            <button class="profile-item logout-item" id="topbar-logout"><i data-lucide="log-out"></i>
+                                Sign Out</button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- PAGES -->
+            <main class="pages-area" id="pages-area">
+
+                <!-- ══════════════════════════════════════════════
+           PAGE: LIVE DETECTION (Admin default first page)
+           ══════════════════════════════════════════════ -->
+                <section class="page" id="page-live-detection">
+                    <div class="page-header">
+                        <div>
+                            <h2 class="page-title">
+                                <span class="live-indicator" style="margin-right:10px"><span
+                                        class="pulse-dot"></span>LIVE</span>
+                                Live Detection
+                            </h2>
+                            <p class="page-desc">AI-detected road defects grouped by state — real-time view</p>
+                        </div>
+                        <div class="flex-row" style="gap:8px">
+                            <select id="ld-state-filter" class="form-select" style="width:200px">
+                                <option value="">All States</option>
+                            </select>
+                            <button class="btn-ghost" id="ld-refresh"><i data-lucide="refresh-cw"></i> Refresh</button>
+                        </div>
+                    </div>
+
+                    <!-- Detection Stats Row -->
+                    <div class="detection-stats-row" id="detection-stats-row"></div>
+
+                    <!-- State Sections -->
+                    <div id="ld-content"></div>
+                </section>
+
+                <!-- ══════════════════════════════════════════════
+           PAGE: DASHBOARD
+           ══════════════════════════════════════════════ -->
+                <section class="page" id="page-dashboard">
+                    <div class="page-header">
+                        <div>
+                            <h2 class="page-title">Overview Dashboard</h2>
+                            <p class="page-desc">Infrastructure health monitoring — <span id="dash-state-label">All
+                                    States</span></p>
+                        </div>
+                        <div class="flex-row" style="gap:8px">
+                            <!-- Admin assign — ADMIN ONLY, hidden for others -->
+                            <button class="btn-primary admin-only-el" id="btn-assign-work" style="display:none">
+                                <i data-lucide="user-check"></i> Assign Work
+                            </button>
+                            <button class="btn-ghost admin-only-el" id="btn-export-csv" style="display:none">
+                                <i data-lucide="download"></i> Export CSV
+                            </button>
+                            <span class="worker-greeting admin-hide" id="worker-greeting" style="display:none"></span>
+                        </div>
+                    </div>
+
+                    <!-- KPI -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card kpi-critical">
+                            <div class="kpi-icon-wrap"><i data-lucide="alert-triangle"></i></div>
+                            <div class="kpi-body">
+                                <div class="kpi-num" id="kpi-critical">0</div>
+                                <div class="kpi-lbl">Critical Issues</div>
+                            </div>
+                            <div class="kpi-trend kpi-up"><i data-lucide="trending-up"></i>+8%</div>
+                        </div>
+                        <div class="kpi-card kpi-active">
+                            <div class="kpi-icon-wrap"><i data-lucide="activity"></i></div>
+                            <div class="kpi-body">
+                                <div class="kpi-num" id="kpi-active">0</div>
+                                <div class="kpi-lbl">Active Reports</div>
+                            </div>
+                            <div class="kpi-trend kpi-up"><i data-lucide="trending-up"></i>+12%</div>
+                        </div>
+                        <div class="kpi-card kpi-resolved">
+                            <div class="kpi-icon-wrap"><i data-lucide="check-circle-2"></i></div>
+                            <div class="kpi-body">
+                                <div class="kpi-num" id="kpi-resolved">0</div>
+                                <div class="kpi-lbl">Resolved</div>
+                            </div>
+                            <div class="kpi-trend kpi-down"><i data-lucide="trending-up"></i>+5%</div>
+                        </div>
+                        <div class="kpi-card kpi-cost">
+                            <div class="kpi-icon-wrap"><i data-lucide="indian-rupee"></i></div>
+                            <div class="kpi-body">
+                                <div class="kpi-num" id="kpi-cost">₹0</div>
+                                <div class="kpi-lbl">Est. Repair Cost</div>
+                            </div>
+                            <div class="kpi-trend kpi-neutral"><i data-lucide="minus"></i>Steady</div>
+                        </div>
+                    </div>
+
+                    <div class="dash-grid">
+                        <!-- Map -->
+                        <div class="card card-wide">
+                            <div class="card-head">
+                                <h3><i data-lucide="map-pin"></i> Road Health Map</h3>
+                                <div class="card-head-actions">
+                                    <div class="legend-chips">
+                                        <span class="legend-chip chip-critical"><span
+                                                class="chip-dot"></span>Critical</span>
+                                        <span class="legend-chip chip-medium"><span
+                                                class="chip-dot"></span>Medium</span>
+                                        <span class="legend-chip chip-low"><span class="chip-dot"></span>Low</span>
+                                    </div>
+                                    <button class="btn-icon" id="btn-fullmap"><i data-lucide="maximize-2"></i></button>
+                                </div>
+                            </div>
+                            <div class="card-body no-pad">
+                                <div id="dash-map" style="height:280px;width:100%;border-radius:0 0 12px 12px"></div>
+                            </div>
+                        </div>
+                        <!-- Severity -->
+                        <div class="card">
+                            <div class="card-head">
+                                <h3><i data-lucide="pie-chart"></i> Severity</h3>
+                            </div>
+                            <div class="card-body chart-body"><canvas id="chart-severity" height="200"></canvas></div>
+                        </div>
+                        <!-- Trend -->
+                        <div class="card card-wide">
+                            <div class="card-head">
+                                <h3><i data-lucide="trending-up"></i> Detection Trend</h3>
+                                <div class="card-head-actions">
+                                    <div class="period-tabs">
+                                        <button class="period-tab" data-days="7">7D</button>
+                                        <button class="period-tab active" data-days="30">30D</button>
+                                        <button class="period-tab" data-days="90">90D</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body chart-body"><canvas id="chart-trend" height="130"></canvas></div>
+                        </div>
+                        <!-- Activity Feed -->
+                        <div class="card">
+                            <div class="card-head">
+                                <h3><i data-lucide="zap"></i> Event Log</h3><span class="live-indicator"><span
+                                        class="pulse-dot"></span>LIVE</span>
+                            </div>
+                            <div class="card-body no-pad">
+                                <div class="activity-feed" id="activity-feed"></div>
+                            </div>
+                        </div>
+                        <!-- Admin: recent issues -->
+                        <div class="card card-wide admin-only-el" id="admin-issues-card" style="display:none">
+                            <div class="card-head">
+                                <h3><i data-lucide="list"></i> Recent Issues</h3><button class="btn-sm"
+                                    id="btn-view-all-issues">View All →</button>
+                            </div>
+                            <div class="card-body no-pad">
+                                <div class="table-wrap">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Image</th>
+                                                <th>Type</th>
+                                                <th>Location</th>
+                                                <th>State</th>
+                                                <th>Severity</th>
+                                                <th>Status</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="mini-issues-tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Worker: tasks -->
+                        <div class="card card-wide worker-only-el" id="worker-tasks-card" style="display:none">
+                            <div class="card-head">
+                                <h3><i data-lucide="clipboard-list"></i> My Assigned Tasks</h3><span class="badge-count"
+                                    id="worker-task-count">0 tasks</span>
+                            </div>
+                            <div class="card-body no-pad">
+                                <div class="task-list" id="task-list"></div>
+                            </div>
+                        </div>
+                        <!-- User: my reports -->
+                        <div class="card card-wide user-only-el" id="user-reports-card" style="display:none">
+                            <div class="card-head">
+                                <h3><i data-lucide="file-text"></i> My Reports</h3><button class="btn-sm"
+                                    onclick="window.navigateTo('reports')">Submit New +</button>
+                            </div>
+                            <div class="card-body no-pad">
+                                <div id="user-report-list"></div>
+                            </div>
+                        </div>
+                        <!-- Defect types -->
+                        <div class="card">
+                            <div class="card-head">
+                                <h3><i data-lucide="layers"></i> Defect Types</h3>
+                            </div>
+                            <div class="card-body chart-body"><canvas id="chart-defects" height="200"></canvas></div>
+                        </div>
+                        <!-- State bars -->
+                        <div class="card">
+                            <div class="card-head">
+                                <h3><i data-lucide="map"></i> Top Affected States</h3>
+                            </div>
+                            <div class="card-body no-pad">
+                                <div class="state-bars" id="state-bars"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ══════════════════════════════════════════════
+           PAGE: MAP VIEW
+           ══════════════════════════════════════════════ -->
+                <section class="page" id="page-map">
+                    <div class="page-header">
+                        <div>
+                            <h2 class="page-title">Interactive Map</h2>
+                            <p class="page-desc">All reported road issues across India</p>
+                        </div>
+                        <button class="btn-primary" id="btn-report-issue-from-map"><i data-lucide="plus"></i> Report
+                            Issue</button>
+                    </div>
+                    <div class="map-layout">
+                        <div class="map-controls-panel">
+                            <div class="map-control-section">
+                                <h4>Filter by State</h4>
+                                <select id="map-state-filter" class="full-select">
+                                    <option value="">All States</option>
+                                    <option>Andhra Pradesh</option>
+                                    <option>Assam</option>
+                                    <option>Bihar</option>
+                                    <option>Chandigarh</option>
+                                    <option>Delhi</option>
+                                    <option>Goa</option>
+                                    <option>Gujarat</option>
+                                    <option>Haryana</option>
+                                    <option>Karnataka</option>
+                                    <option>Kerala</option>
+                                    <option>Madhya Pradesh</option>
+                                    <option>Maharashtra</option>
+                                    <option>Odisha</option>
+                                    <option>Punjab</option>
+                                    <option>Rajasthan</option>
+                                    <option>Tamil Nadu</option>
+                                    <option>Telangana</option>
+                                    <option>Uttar Pradesh</option>
+                                    <option>Uttarakhand</option>
+                                    <option>West Bengal</option>
+                                </select>
+                            </div>
+                            <div class="map-control-section">
+                                <h4>Severity</h4>
+                                <div class="check-group">
+                                    <label class="check-item"><input type="checkbox" data-sev="critical" checked /><span
+                                            class="check-dot critical"></span> Critical</label>
+                                    <label class="check-item"><input type="checkbox" data-sev="medium" checked /><span
+                                            class="check-dot medium"></span> Medium</label>
+                                    <label class="check-item"><input type="checkbox" data-sev="low" checked /><span
+                                            class="check-dot low"></span> Low</label>
+                                </div>
+                            </div>
+                            <div class="map-control-section">
+                                <h4>Issue Type</h4>
+                                <div class="check-group">
+                                    <label class="check-item"><input type="checkbox" data-type="Pothole" checked />
+                                        Pothole</label>
+                                    <label class="check-item"><input type="checkbox" data-type="Cracking" checked />
+                                        Cracking</label>
+                                    <label class="check-item"><input type="checkbox" data-type="Rutting" checked />
+                                        Rutting</label>
+                                    <label class="check-item"><input type="checkbox" data-type="Edge Damage" checked />
+                                        Edge Damage</label>
+                                    <label class="check-item"><input type="checkbox" data-type="Subsidence" checked />
+                                        Subsidence</label>
+                                    <label class="check-item"><input type="checkbox" data-type="Flooding" checked />
+                                        Flooding</label>
+                                </div>
+                            </div>
+                            <div class="map-control-section">
+                                <h4>Status</h4>
+                                <div class="check-group">
+                                    <label class="check-item"><input type="checkbox" data-status="pending" checked />
+                                        Pending</label>
+                                    <label class="check-item"><input type="checkbox" data-status="in-progress"
+                                            checked /> In Progress</label>
+                                    <label class="check-item"><input type="checkbox" data-status="resolved" checked />
+                                        Resolved</label>
+                                </div>
+                            </div>
+                            <div class="map-stats-row">
+                                <div class="map-stat-box">
+                                    <div id="map-total-count" class="map-stat-num">0</div><small>Visible</small>
+                                </div>
+                                <div class="map-stat-box">
+                                    <div id="map-critical-count" class="map-stat-num text-critical">0</div>
+                                    <small>Critical</small>
+                                </div>
+                                <div class="map-stat-box">
+                                    <div id="map-resolved-count" class="map-stat-num text-low">0</div>
+                                    <small>Resolved</small>
+                                </div>
+                            </div>
+                            <button class="btn-ghost full-btn" id="map-reset-filters"><i data-lucide="refresh-cw"></i>
+                                Reset Filters</button>
+                        </div>
+                        <div id="fullscreen-map" class="map-main"></div>
+                    </div>
+                </section>
+
+                <!-- ══════════════════════════════════════════════
+           PAGE: REPORTS  (works for all roles)
+           ══════════════════════════════════════════════ -->
+                <section class="page" id="page-reports">
+                    <div class="page-header">
+                        <div>
+                            <h2 class="page-title">Reports</h2>
+                            <p class="page-desc">Submit and track road issue reports — open to everyone</p>
+                        </div>
+                        <div class="flex-row" style="gap:8px">
+                            <button class="btn-ghost admin-only-el" id="btn-export-reports" style="display:none"><i
+                                    data-lucide="download"></i> Export</button>
+                            <button class="btn-primary" id="btn-new-report"><i data-lucide="plus"></i> New
+                                Report</button>
+                        </div>
+                    </div>
+
+                    <!-- Report Form -->
+                    <div class="card report-form-card" id="report-form-card" style="display:none">
+                        <div class="card-head">
+                            <h3><i data-lucide="flag"></i> Report a Road Issue</h3><button class="btn-icon"
+                                id="close-report-form"><i data-lucide="x"></i></button>
+                        </div>
+                        <div class="card-body">
+                            <div class="report-form-grid">
+                                <div class="form-field">
+                                    <label>Issue Type <span class="req">*</span></label>
+                                    <select id="report-type" class="form-select">
+                                        <option value="">Select type…</option>
+                                        <option>Pothole</option>
+                                        <option>Cracking</option>
+                                        <option>Rutting</option>
+                                        <option>Edge Damage</option>
+                                        <option>Subsidence</option>
+                                        <option>Flooding</option>
+                                        <option>Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-field">
+                                    <label>Severity <span class="req">*</span></label>
+                                    <select id="report-severity" class="form-select">
+                                        <option value="">Select severity…</option>
+                                        <option value="critical">🔴 Critical — Immediate danger</option>
+                                        <option value="medium">🟠 Medium — Needs attention</option>
+                                        <option value="low">🟢 Low — Minor, schedule repair</option>
+                                    </select>
+                                </div>
+                                <div class="form-field form-field-full">
+                                    <label>Location / Address <span class="req">*</span></label>
+                                    <div class="input-with-btn">
+                                        <input type="text" id="report-location" class="form-input"
+                                            placeholder="e.g. MG Road, Bangalore" />
+                                        <button class="btn-sm" id="btn-detect-location"><i data-lucide="crosshair"></i>
+                                            Auto-Detect</button>
+                                    </div>
+                                    <div class="location-status" id="location-status"></div>
+                                </div>
+                                <div class="form-field">
+                                    <label>State</label>
+                                    <select id="report-state" class="form-select">
+                                        <option value="">Select state…</option>
+                                        <option>Andhra Pradesh</option>
+                                        <option>Bihar</option>
+                                        <option>Delhi</option>
+                                        <option>Gujarat</option>
+                                        <option>Haryana</option>
+                                        <option>Karnataka</option>
+                                        <option>Kerala</option>
+                                        <option>Madhya Pradesh</option>
+                                        <option>Maharashtra</option>
+                                        <option>Punjab</option>
+                                        <option>Rajasthan</option>
+                                        <option>Tamil Nadu</option>
+                                        <option>Telangana</option>
+                                        <option>Uttar Pradesh</option>
+                                        <option>Uttarakhand</option>
+                                        <option>West Bengal</option>
+                                        <option>Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-field">
+                                    <label>Your Name <span class="optional-tag">optional</span></label>
+                                    <input type="text" id="report-name" class="form-input"
+                                        placeholder="Stays anonymous if empty" />
+                                </div>
+                                <div class="form-field form-field-full">
+                                    <label>Description</label>
+                                    <textarea id="report-desc" class="form-textarea" rows="3"
+                                        placeholder="Describe the issue — size, duration, danger level…"></textarea>
+                                </div>
+                                <div class="form-field form-field-full">
+                                    <label>Upload Photo <span class="optional-tag">optional</span></label>
+                                    <div class="upload-drop-zone" id="report-upload-zone">
+                                        <i data-lucide="camera"></i>
+                                        <span>Drag & drop or click to upload</span>
+                                        <small>JPG, PNG, WEBP — max 10MB</small>
+                                    </div>
+                                    <input type="file" id="report-image-input" accept="image/*" hidden />
+                                    <div id="report-image-preview" style="display:none" class="image-preview-wrap">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button class="btn-ghost" id="cancel-report"><i data-lucide="x"></i> Cancel</button>
+                                <button class="btn-primary" id="submit-report"><i data-lucide="send"></i> Submit
+                                    Report</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reports Table with Image column -->
+                    <div class="card">
+                        <div class="card-head">
+                            <h3>Submitted Reports <span class="badge-count" id="reports-total-badge">0</span></h3>
+                            <div class="card-head-actions">
+                                <div class="search-bar"><i data-lucide="search"></i><input type="text"
+                                        id="reports-search" placeholder="Search…" /></div>
+                                <select class="small-select" id="report-filter-severity">
+                                    <option value="">All Severities</option>
+                                    <option value="critical">Critical</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                                <select class="small-select" id="report-filter-status">
+                                    <option value="">All Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="resolved">Resolved</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-body no-pad">
+                            <div class="table-wrap">
+                                <table class="data-table" id="reports-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Photo</th>
+                                            <th>ID</th>
+                                            <th>Type</th>
+                                            <th>Location</th>
+                                            <th>State</th>
+                                            <th>Severity</th>
+                                            <th>Reporter</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                            <!-- Admin gets action col, worker gets complete col -->
+                                            <th id="reports-action-header" style="display:none">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="reports-tbody"></tbody>
+                                </table>
+                            </div>
+                            <div class="table-pagination" id="reports-pagination"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ══════════════════════════════════════════════
+           PAGE: NOTIFICATIONS
+           ══════════════════════════════════════════════ -->
+                <section class="page" id="page-notifications">
+                    <div class="page-header">
+                        <div>
+                            <h2 class="page-title">Notifications</h2>
+                            <p class="page-desc">Event-driven alerts — only created by real system actions</p>
+                        </div>
+                        <div class="flex-row" style="gap:8px">
+                            <button class="btn-ghost" id="notif-mark-all"><i data-lucide="check-check"></i> Mark all
+                                read</button>
+                            <button class="btn-ghost" id="notif-clear-all"><i data-lucide="trash-2"></i> Clear
+                                all</button>
+                        </div>
+                    </div>
+                    <div class="notif-filter-bar">
+                        <button class="notif-filter-btn active" data-filter="all">All</button>
+                        <button class="notif-filter-btn" data-filter="critical">🔴 Critical</button>
+                        <button class="notif-filter-btn" data-filter="medium">🟠 Medium</button>
+                        <button class="notif-filter-btn" data-filter="low">🟢 Resolved</button>
+                        <button class="notif-filter-btn" data-filter="info">ℹ️ Info</button>
+                        <button class="notif-filter-btn" data-filter="unread">🔵 Unread</button>
+                    </div>
+                    <div class="notif-page-list" id="notif-page-list"></div>
+                </section>
+
+                <!-- ══════════════════════════════════════════════
+           PAGE: SETTINGS
+           ══════════════════════════════════════════════ -->
+                <section class="page" id="page-settings">
+                    <div class="page-header">
+                        <h2 class="page-title">Settings</h2>
+                    </div>
+                    <div class="settings-layout">
+                        <div class="settings-sidebar">
+                            <button class="settings-tab active" data-tab="profile"><i data-lucide="user"></i>
+                                Profile</button>
+                            <button class="settings-tab" data-tab="appearance"><i data-lucide="palette"></i>
+                                Appearance</button>
+                            <button class="settings-tab" data-tab="security"><i data-lucide="shield"></i>
+                                Security</button>
+                            <button class="settings-tab" data-tab="notif-pref"><i data-lucide="bell"></i>
+                                Notifications</button>
+                            <button class="settings-tab" data-tab="api"><i data-lucide="code-2"></i> API Access</button>
+                        </div>
+                        <div class="settings-content">
+                            <div class="settings-panel active" id="tab-profile">
+                                <h3 class="settings-panel-title">Profile Information</h3>
+                                <div class="settings-avatar-row">
+                                    <div class="settings-avatar" id="settings-avatar-display">A</div>
+                                    <div>
+                                        <h4 id="settings-display-name">Admin User</h4>
+                                        <p id="settings-display-role" class="settings-role-text">Administrator</p>
+                                    </div>
+                                </div>
+                                <div class="settings-form-grid">
+                                    <div class="form-field"><label>Display Name</label><input type="text"
+                                            class="form-input" id="settings-name" /></div>
+                                    <div class="form-field"><label>Email</label><input type="email" class="form-input"
+                                            id="settings-email" /></div>
+                                    <div class="form-field"><label>Username</label><input type="text" class="form-input"
+                                            id="settings-username" readonly /></div>
+                                    <div class="form-field"><label>Role</label><input type="text" class="form-input"
+                                            id="settings-role-field" readonly /></div>
+                                </div>
+                                <button class="btn-primary" id="save-profile"><i data-lucide="save"></i> Save
+                                    Changes</button>
+                            </div>
+                            <div class="settings-panel" id="tab-appearance">
+                                <h3 class="settings-panel-title">Appearance</h3>
+                                <div class="setting-row">
+                                    <div>
+                                        <h4>Dark Mode</h4>
+                                        <p>Switch between dark and light theme</p>
+                                    </div><label class="toggle-switch"><input type="checkbox" id="dark-mode-toggle"
+                                            checked /><span class="toggle-slider"></span></label>
+                                </div>
+                                <div class="setting-row">
+                                    <div>
+                                        <h4>Compact Sidebar</h4>
+                                        <p>Collapse sidebar to icon-only</p>
+                                    </div><label class="toggle-switch"><input type="checkbox"
+                                            id="compact-sidebar-toggle" /><span class="toggle-slider"></span></label>
+                                </div>
+                            </div>
+                            <div class="settings-panel" id="tab-security">
+                                <h3 class="settings-panel-title">Security</h3>
+                                <div class="security-info-box"><i data-lucide="shield-check"></i>
+                                    <div><strong>Account Secure</strong>
+                                        <p>Last login: Today via RoadPulse Dashboard</p>
+                                    </div>
+                                </div>
+                                <div class="settings-form-grid">
+                                    <div class="form-field form-field-full"><label>Current Password</label><input
+                                            type="password" class="form-input" id="current-pw"
+                                            placeholder="Enter current password" /></div>
+                                    <div class="form-field"><label>New Password</label><input type="password"
+                                            class="form-input" id="new-pw" placeholder="Min. 8 characters" /></div>
+                                    <div class="form-field"><label>Confirm Password</label><input type="password"
+                                            class="form-input" id="confirm-pw" placeholder="Repeat new password" />
+                                    </div>
+                                </div>
+                                <button class="btn-primary" id="save-password"><i data-lucide="lock"></i> Update
+                                    Password</button>
+                            </div>
+                            <div class="settings-panel" id="tab-notif-pref">
+                                <h3 class="settings-panel-title">Notification Preferences</h3>
+                                <div class="setting-row">
+                                    <div>
+                                        <h4>New Issue Alerts</h4>
+                                        <p>Notify when new issues are reported</p>
+                                    </div><label class="toggle-switch"><input type="checkbox" checked /><span
+                                            class="toggle-slider"></span></label>
+                                </div>
+                                <div class="setting-row">
+                                    <div>
+                                        <h4>Assignment Updates</h4>
+                                        <p>Notify when tasks assigned to you</p>
+                                    </div><label class="toggle-switch"><input type="checkbox" checked /><span
+                                            class="toggle-slider"></span></label>
+                                </div>
+                                <div class="setting-row">
+                                    <div>
+                                        <h4>Resolution Alerts</h4>
+                                        <p>Notify when issues resolved</p>
+                                    </div><label class="toggle-switch"><input type="checkbox" checked /><span
+                                            class="toggle-slider"></span></label>
+                                </div>
+                            </div>
+                            <div class="settings-panel" id="tab-api">
+                                <h3 class="settings-panel-title">API Access</h3>
+                                <div class="api-key-box"><label>Your API Token (JWT)</label>
+                                    <div class="api-key-row"><code class="api-key-display"
+                                            id="api-key-display">••••••••••••••••••••••••••••••••</code><button
+                                            class="btn-sm" id="btn-reveal-token"><i data-lucide="eye"></i>
+                                            Reveal</button><button class="btn-sm" id="btn-copy-token"><i
+                                                data-lucide="copy"></i> Copy</button></div>
+                                </div>
+                                <div class="api-endpoints">
+                                    <h4>Real-Event API Endpoints (backend.py)</h4>
+                                    <div class="endpoint-row"><span
+                                            class="method-post">POST</span><code>/api/auth/login</code><span>Login → JWT
+                                            + role</span></div>
+                                    <div class="endpoint-row"><span
+                                            class="method-post">POST</span><code>/api/issues</code><span>Submit issue →
+                                            creates notification</span></div>
+                                    <div class="endpoint-row"><span
+                                            class="method-post">POST</span><code>/api/issues/{id}/assign</code><span>Assign
+                                            → creates notification</span></div>
+                                    <div class="endpoint-row"><span
+                                            class="method-put">PUT</span><code>/api/issues/{id}/complete</code><span>Complete
+                                            → creates notification</span></div>
+                                    <div class="endpoint-row"><span
+                                            class="method-get">GET</span><code>/api/notifications</code><span>Fetch real
+                                            notifications only</span></div>
+                                </div>
+                                <p class="api-note"><i data-lucide="info"></i> Run <code>python backend.py</code> to
+                                    start API on port 8000.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ══════════════════════════════════════════════
+           PAGE: ALL ISSUES (Admin)
+           ══════════════════════════════════════════════ -->
+                <section class="page" id="page-issues">
+                    <div class="page-header">
+                        <div>
+                            <h2 class="page-title">All Issues</h2>
+                            <p class="page-desc">Manage, assign and resolve all road issues</p>
+                        </div>
+                        <div class="flex-row" style="gap:8px">
+                            <button class="btn-ghost" id="btn-export-issues"><i data-lucide="download"></i> Export
+                                CSV</button>
+                            <button class="btn-primary" id="btn-bulk-assign"><i data-lucide="user-check"></i> Assign
+                                Selected</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-head">
+                            <div class="search-bar"><i data-lucide="search"></i><input type="text" id="issues-search"
+                                    placeholder="Search by type, location, ID…" /></div>
+                            <div class="card-head-actions">
+                                <select class="small-select" id="issues-sev-filter">
+                                    <option value="">All Severities</option>
+                                    <option value="critical">Critical</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                                <select class="small-select" id="issues-status-filter">
+                                    <option value="">All Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="resolved">Resolved</option>
+                                </select>
+                                <select class="small-select" id="issues-state-filter">
+                                    <option value="">All States</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-body no-pad">
+                            <div class="table-wrap">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th><input type="checkbox" id="select-all-issues" /></th>
+                                            <th>Photo</th>
+                                            <th>ID</th>
+                                            <th>Type</th>
+                                            <th>Location</th>
+                                            <th>State</th>
+                                            <th>Severity</th>
+                                            <th>Reporter</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="issues-tbody"></tbody>
+                                </table>
+                            </div>
+                            <div class="table-pagination" id="issues-pagination"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ══════════════════════════════════════════════
+           PAGE: WORKERS (Admin)
+           ══════════════════════════════════════════════ -->
+                <section class="page" id="page-workers">
+                    <div class="page-header">
+                        <div>
+                            <h2 class="page-title">Worker Management</h2>
+                            <p class="page-desc">Monitor field workers and task assignments</p>
+                        </div>
+                        <button class="btn-primary"><i data-lucide="user-plus"></i> Add Worker</button>
+                    </div>
+                    <div class="workers-summary-bar" id="workers-summary-bar"></div>
+                    <div class="workers-grid" id="workers-grid"></div>
+                </section>
+
+                <!-- ══════════════════════════════════════════════
+           PAGE: ANALYTICS (Admin)
+           ══════════════════════════════════════════════ -->
+                <section class="page" id="page-analytics">
+                    <div class="page-header">
+                        <div>
+                            <h2 class="page-title">Analytics</h2>
+                            <p class="page-desc">Performance metrics, cost estimates, resolution insights</p>
+                        </div>
+                        <div class="flex-row" style="gap:8px">
+                            <select class="small-select" id="analytics-period">
+                                <option value="7">Last 7 days</option>
+                                <option value="30" selected>Last 30 days</option>
+                                <option value="90">Last 90 days</option>
+                            </select>
+                            <button class="btn-ghost" id="btn-export-analytics"><i data-lucide="download"></i>
+                                Export</button>
+                        </div>
+                    </div>
+                    <div class="analytics-kpi-row" id="analytics-kpi-row"></div>
+                    <div class="analytics-grid">
+                        <div class="card card-wide">
+                            <div class="card-head">
+                                <h3><i data-lucide="bar-chart-2"></i> Monthly Issue Trends</h3>
+                            </div>
+                            <div class="card-body chart-body"><canvas id="chart-monthly" height="180"></canvas></div>
+                        </div>
+                        <div class="card">
+                            <div class="card-head">
+                                <h3><i data-lucide="map"></i> State Distribution</h3>
+                            </div>
+                            <div class="card-body chart-body"><canvas id="chart-states" height="220"></canvas></div>
+                        </div>
+                        <div class="card">
+                            <div class="card-head">
+                                <h3><i data-lucide="check-circle"></i> Resolution Rate</h3>
+                            </div>
+                            <div class="card-body chart-body"><canvas id="chart-resolution" height="220"></canvas></div>
+                        </div>
+                        <div class="card card-wide">
+                            <div class="card-head">
+                                <h3><i data-lucide="indian-rupee"></i> Cost Estimate by Defect Type</h3>
+                            </div>
+                            <div class="card-body chart-body"><canvas id="chart-cost-type" height="160"></canvas></div>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- ═══════════════════ MODALS ═══════════════════ -->
+
+    <!-- Assign Work Modal — Admin Only -->
+    <div class="modal-overlay" id="assign-modal" style="display:none">
+        <div class="modal-card">
+            <div class="modal-head">
+                <h3><i data-lucide="user-check"></i> Assign Work</h3><button class="btn-icon modal-close-btn"
+                    data-modal="assign-modal"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-field"><label>Select Issue <span class="req">*</span></label><select
+                        class="form-select" id="assign-issue-select">
+                        <option value="">Choose issue…</option>
+                    </select></div>
+                <div class="form-field"><label>Assign to Worker <span class="req">*</span></label>
+                    <select class="form-select" id="assign-worker-select">
+                        <option value="">Choose worker…</option>
+                        <option value="w1">Ramesh Kumar — Mumbai</option>
+                        <option value="w2">Priya Sharma — Delhi</option>
+                        <option value="w3">Arjun Patel — Ahmedabad</option>
+                        <option value="w4">Sneha Reddy — Bangalore</option>
+                        <option value="w5">Vikram Singh — Lucknow</option>
+                        <option value="w6">Meena Nair — Chennai</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>Priority</label>
+                    <select class="form-select" id="assign-priority">
+                        <option value="urgent">🔴 Urgent — Fix within 24h</option>
+                        <option value="normal" selected>🟡 Normal — Fix within a week</option>
+                        <option value="low">🟢 Low — Schedule when convenient</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>Instructions</label><textarea class="form-textarea" id="assign-notes"
+                        rows="3" placeholder="Special instructions…"></textarea></div>
+            </div>
+            <div class="modal-foot"><button class="btn-ghost modal-close-btn"
+                    data-modal="assign-modal">Cancel</button><button class="btn-primary" id="confirm-assign"><i
+                        data-lucide="send"></i> Assign Task</button></div>
+        </div>
+    </div>
+
+    <!-- Issue Detail Modal -->
+    <div class="modal-overlay" id="issue-detail-modal" style="display:none">
+        <div class="modal-card modal-wide">
+            <div class="modal-head">
+                <h3 id="issue-detail-title">Issue Details</h3><button class="btn-icon modal-close-btn"
+                    data-modal="issue-detail-modal"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body" id="issue-detail-body"></div>
+            <div class="modal-foot">
+                <button class="btn-ghost modal-close-btn" data-modal="issue-detail-modal">Close</button>
+                <!-- Only shown to admin -->
+                <button class="btn-primary" id="issue-detail-assign" style="display:none"><i
+                        data-lucide="user-check"></i> Assign This Issue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Stack -->
+    <div class="toast-stack" id="toast-stack"></div>
+
+    <!-- Anonymous Banner -->
+    <div class="anon-banner" id="anon-banner" style="display:none">
+        <i data-lucide="info"></i>
+        <span>Browsing as <strong>Anonymous</strong> — Map view and issue reporting are open to everyone.</span>
+        <button id="anon-login-btn">Sign In for Full Access →</button>
+    </div>
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebar-overlay" style="display:none"></div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,32 @@
+# ============================================================
+# Road AI Project - YOLOv8 Model Configuration
+# ============================================================
+# This config defines the classes, paths, and training params
+# for the road defect detection model.
+
+# --- Dataset Paths ---
+path: D:/Road_AI_Project/ai_models/dataset/unified
+train: images/train
+val: images/val
+test: images/test
+
+# --- Number of classes ---
+nc: 14
+
+# --- Class Names ---
+# These are the 14 types of road features we detect
+names:
+  0: Pothole
+  1: Edge_Deterioration
+  2: Alligator_Cracking
+  3: Rutting
+  4: Subsidence
+  5: Cracking
+  6: Bleeding
+  7: Fretting
+  8: Repaired_Pothole
+  9: Line_Marking
+  10: Storm_Drain
+  11: Manhole
+  12: Guard_Rail
+  13: Traffic_Sign
