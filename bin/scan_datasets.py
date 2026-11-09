@@ -2,7 +2,7 @@ import zipfile, os, yaml, json
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
-SAVE_PATH = 'D:/Road_AI_Project/ai_models/dataset'
+SAVE_PATH = str(Path(__file__).resolve().parent.parent / "ai_models/dataset")
 
 # Extract new ZIPs
 for f in sorted(os.listdir(SAVE_PATH)):

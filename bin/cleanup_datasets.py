@@ -1,7 +1,7 @@
 import shutil, os
 from pathlib import Path
 
-SAVE_PATH = 'D:/Road_AI_Project/ai_models/dataset'
+SAVE_PATH = str(Path(__file__).resolve().parent.parent / "ai_models/dataset")
 
 DELETE_FOLDERS = [
     'archive_(10)',

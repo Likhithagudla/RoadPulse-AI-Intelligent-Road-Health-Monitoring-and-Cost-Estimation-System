@@ -1,41 +1,52 @@
+"""
+RoadPulse AI - Admin Seeding Script
+Safely provisions the default administrator account using enterprise bcrypt password hashing.
+"""
 
-import os
 import sys
-import hashlib
-from sqlalchemy.orm import Session
+from pathlib import Path
 
-# Add current dir to path for imports
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Add backend directory to path
+BACKEND_DIR = Path(__file__).resolve().parent
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
 
-import models
-import database
+from app.core.database import SessionLocal
+from app.core.security import SecurityService
+from app.models.user import User
 
-def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
 
-def seed_admin():
-    db = database.SessionLocal()
+def seed_admin(username: str = "admin", password: str = "AdminPassword123!") -> None:
+    """Provisions or updates default administrator user account with bcrypt hash."""
+    db = SessionLocal()
     try:
-        # Check if admin already exists
-        admin = db.query(models.User).filter(models.User.username == "admin").first()
+        admin = db.query(User).filter(User.username == username).first()
+        hashed = SecurityService.get_password_hash(password)
+
         if admin:
-            print("Admin user already exists. Updating password...")
-            admin.password_hash = hash_password("admin123")
+            print(f"[INFO] Admin user '{username}' already exists. Updating credentials...")
+            admin.password_hash = hashed
+            admin.role = "admin"
+            admin.is_active = True
         else:
-            print("Creating admin user...")
-            new_admin = models.User(
-                username="admin",
-                password_hash=hash_password("admin123")
+            print(f"[INFO] Creating administrative user '{username}'...")
+            admin = User(
+                username=username,
+                password_hash=hashed,
+                role="admin",
+                is_active=True,
             )
-            db.add(new_admin)
-        
+            db.add(admin)
+
         db.commit()
-        print("Successfully seeded admin user (Username: admin, Password: admin123)")
-    except Exception as e:
-        print(f"Error seeding user: {e}")
+        print(f"[SUCCESS] Successfully seeded admin user (Username: {username})")
+    except Exception as exc:
         db.rollback()
+        print(f"[ERROR] Failed seeding admin account: {exc}")
+        raise
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     seed_admin()

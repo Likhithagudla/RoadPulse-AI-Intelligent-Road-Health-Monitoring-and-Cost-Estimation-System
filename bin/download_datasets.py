@@ -9,7 +9,7 @@ import shutil
 from pathlib import Path
 
 # ── Paths ──────────────────────────────────────────────
-BASE_DIR = Path("D:/Road_AI_Project/ai_models/dataset")
+BASE_DIR = Path(str(Path(__file__).resolve().parent.parent / "ai_models/dataset"))
 
 # ── Kaggle Datasets to Download ─────────────────────────
 # These are the best free road damage datasets on Kaggle

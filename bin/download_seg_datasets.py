@@ -18,7 +18,7 @@ from pathlib import Path
 from urllib.request import urlretrieve, urlopen
 from urllib.error import URLError
 
-SAVE_PATH = "D:/Road_AI_Project/ai_models/dataset"
+SAVE_PATH = str(Path(__file__).resolve().parent.parent / "ai_models/dataset")
 ROBOFLOW_API_KEY = "RPOBmjD1UhE2l7j05cCv"
 os.makedirs(SAVE_PATH, exist_ok=True)
 

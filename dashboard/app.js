@@ -10,112 +10,99 @@
 ================================================================ */
 
 /* ─────────────────────────────────────────────────────────────
-   MOCK DATA
+   ROAD HEALTH PLATFORM CONFIGURATION & REUSABLE API SERVICES
 ───────────────────────────────────────────────────────────── */
-const USERS = {
-    admin: { password: 'admin123', role: 'admin', name: 'Admin User', email: 'admin@roadpulse.ai', avatar: 'A' },
-    worker: { password: 'worker123', role: 'worker', name: 'Ramesh Kumar', email: 'worker@roadpulse.ai', avatar: 'R' },
-    user1: { password: 'user123', role: 'user', name: 'Priya Sharma', email: 'user1@roadpulse.ai', avatar: 'P' },
-};
 const ROLE_LABELS = { admin: 'Administrator', worker: 'Field Worker', user: 'Citizen User', anonymous: 'Anonymous' };
 
-/* Sample images — realistic road-defect placeholder URLs */
-const SAMPLE_IMAGES = [
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Pothole_on_a_road.jpg/320px-Pothole_on_a_road.jpg',
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Cracked_road_surface.jpg/320px-Cracked_road_surface.jpg',
-    null, // some issues have no photo
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Pothole_on_a_road.jpg/320px-Pothole_on_a_road.jpg',
-    null,
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Cracked_road_surface.jpg/320px-Cracked_road_surface.jpg',
-    null,
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Pothole_on_a_road.jpg/320px-Pothole_on_a_road.jpg',
-    null,
-    null,
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Cracked_road_surface.jpg/320px-Cracked_road_surface.jpg',
-    null,
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Pothole_on_a_road.jpg/320px-Pothole_on_a_road.jpg',
-    null,
-    null,
-];
+// Environment-aware API Base URL
+const API_BASE = window.ROAD_PULSE_API_URL || (window.location.port === "8000" ? window.location.origin : "http://localhost:8000");
 
-const MOCK_ISSUES = [
-    { id: 'RPT-001', type: 'Pothole', location: 'NH-48, Gurgaon', state: 'Haryana', severity: 'critical', reporter: 'Anonymous', date: '2024-04-20', status: 'pending', lat: 28.4595, lng: 77.0266, image: SAMPLE_IMAGES[0] },
-    { id: 'RPT-002', type: 'Cracking', location: 'Ring Road, Delhi', state: 'Delhi', severity: 'medium', reporter: 'Priya Sharma', date: '2024-04-19', status: 'in-progress', lat: 28.6139, lng: 77.2090, image: SAMPLE_IMAGES[1] },
-    { id: 'RPT-003', type: 'Rutting', location: 'SH-3, Pune', state: 'Maharashtra', severity: 'low', reporter: 'Anonymous', date: '2024-04-18', status: 'resolved', lat: 18.5204, lng: 73.8567, image: SAMPLE_IMAGES[2] },
-    { id: 'RPT-004', type: 'Subsidence', location: 'MG Road, Bangalore', state: 'Karnataka', severity: 'critical', reporter: 'Arun Nair', date: '2024-04-18', status: 'pending', lat: 12.9716, lng: 77.5946, image: SAMPLE_IMAGES[3] },
-    { id: 'RPT-005', type: 'Edge Damage', location: 'NH-44, Nagpur', state: 'Maharashtra', severity: 'medium', reporter: 'Anonymous', date: '2024-04-17', status: 'in-progress', lat: 21.1458, lng: 79.0882, image: SAMPLE_IMAGES[4] },
-    { id: 'RPT-006', type: 'Pothole', location: 'VIP Road, Kolkata', state: 'West Bengal', severity: 'critical', reporter: 'Sneha Das', date: '2024-04-17', status: 'pending', lat: 22.5726, lng: 88.3639, image: SAMPLE_IMAGES[5] },
-    { id: 'RPT-007', type: 'Cracking', location: 'Anna Salai, Chennai', state: 'Tamil Nadu', severity: 'low', reporter: 'Anonymous', date: '2024-04-16', status: 'resolved', lat: 13.0827, lng: 80.2707, image: SAMPLE_IMAGES[6] },
-    { id: 'RPT-008', type: 'Flooding', location: 'Andheri, Mumbai', state: 'Maharashtra', severity: 'critical', reporter: 'Ravi Kumar', date: '2024-04-16', status: 'pending', lat: 19.1136, lng: 72.8697, image: SAMPLE_IMAGES[7] },
-    { id: 'RPT-009', type: 'Rutting', location: 'NH-27, Lucknow', state: 'Uttar Pradesh', severity: 'medium', reporter: 'Anonymous', date: '2024-04-15', status: 'in-progress', lat: 26.8467, lng: 80.9462, image: SAMPLE_IMAGES[8] },
-    { id: 'RPT-010', type: 'Pothole', location: 'Sardar Patel Marg, Ahmedabad', state: 'Gujarat', severity: 'low', reporter: 'Anonymous', date: '2024-04-14', status: 'resolved', lat: 23.0225, lng: 72.5714, image: SAMPLE_IMAGES[9] },
-    { id: 'RPT-011', type: 'Edge Damage', location: 'SH-8, Jaipur', state: 'Rajasthan', severity: 'medium', reporter: 'Anonymous', date: '2024-04-14', status: 'pending', lat: 26.9124, lng: 75.7873, image: SAMPLE_IMAGES[10] },
-    { id: 'RPT-012', type: 'Subsidence', location: 'NH-66, Kochi', state: 'Kerala', severity: 'critical', reporter: 'Anonymous', date: '2024-04-13', status: 'in-progress', lat: 9.9312, lng: 76.2673, image: SAMPLE_IMAGES[11] },
-    { id: 'RPT-013', type: 'Pothole', location: 'Outer Ring Road, Hyderabad', state: 'Telangana', severity: 'medium', reporter: 'Anonymous', date: '2024-04-12', status: 'pending', lat: 17.3850, lng: 78.4867, image: SAMPLE_IMAGES[12] },
-    { id: 'RPT-014', type: 'Cracking', location: 'NH-16, Bhubaneswar', state: 'Odisha', severity: 'low', reporter: 'Anonymous', date: '2024-04-11', status: 'resolved', lat: 20.2961, lng: 85.8245, image: SAMPLE_IMAGES[13] },
-    { id: 'RPT-015', type: 'Flooding', location: 'Sector 22, Chandigarh', state: 'Chandigarh', severity: 'critical', reporter: 'Raj Singh', date: '2024-04-10', status: 'pending', lat: 30.7333, lng: 76.7794, image: SAMPLE_IMAGES[14] },
-];
+// Enterprise Reusable API Client
+const RoadPulseAPI = {
+    async request(endpoint, options = {}) {
+        const token = localStorage.getItem('rp_token');
+        const headers = { ...(options.headers || {}) };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        if (options.body && !(options.body instanceof FormData) && !headers['Content-Type']) {
+            headers['Content-Type'] = 'application/json';
+        }
+        try {
+            const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
+            if (res.status === 401 && !endpoint.includes('/auth/login')) {
+                logout();
+                toast('Session expired. Please log in again.', 'error');
+                throw new Error('Session expired');
+            }
+            const data = await res.json();
+            if (!res.ok) {
+                const msg = data.detail || (data.error && data.error.message) || `HTTP error ${res.status}`;
+                throw new Error(msg);
+            }
+            return data;
+        } catch (err) {
+            console.warn(`[RoadPulseAPI] ${endpoint} error:`, err.message);
+            throw err;
+        }
+    },
+    auth: {
+        login: (username, password) => RoadPulseAPI.request('/api/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
+        me: () => RoadPulseAPI.request('/api/auth/me'),
+    },
+    defects: {
+        list: (params = {}) => {
+            const q = new URLSearchParams(params).toString();
+            return RoadPulseAPI.request(`/api/defects${q ? '?' + q : ''}`);
+        },
+        get: (id) => RoadPulseAPI.request(`/api/defects/${id}`),
+        map: () => RoadPulseAPI.request('/api/defects/map'),
+        detect: (formData) => RoadPulseAPI.request('/api/detect', { method: 'POST', body: formData }),
+    },
+    dashboard: {
+        stats: () => RoadPulseAPI.request('/api/dashboard/stats'),
+        trends: (days = 30) => RoadPulseAPI.request(`/api/dashboard/trends?days=${days}`),
+        filters: () => RoadPulseAPI.request('/api/dashboard/filters'),
+    },
+    admin: {
+        workers: () => RoadPulseAPI.request('/api/admin/workers'),
+        assign: (issue_id, worker_id, notes) => RoadPulseAPI.request('/api/admin/assign', { method: 'POST', body: JSON.stringify({ issue_id, worker_id, notes }) }),
+        users: (role = null) => RoadPulseAPI.request(`/api/admin/users${role ? '?role=' + role : ''}`),
+        createUser: (data) => RoadPulseAPI.request('/api/admin/create-user', { method: 'POST', body: JSON.stringify(data) }),
+        toggleUser: (userId) => RoadPulseAPI.request(`/api/admin/users/${userId}/toggle-active`, { method: 'PATCH' }),
+    },
+    worker: {
+        tasks: () => RoadPulseAPI.request('/api/worker/tasks'),
+        updateStatus: (issue_id, status, notes = null) => RoadPulseAPI.request('/api/worker/update-status', { method: 'POST', body: JSON.stringify({ issue_id, status, notes }) }),
+    },
+    repairs: {
+        list: () => RoadPulseAPI.request('/api/repairs'),
+        create: (data) => RoadPulseAPI.request('/api/repairs', { method: 'POST', body: JSON.stringify(data) }),
+    }
+};
 
-/*
-  FIX 1 — NOTIFICATIONS: only created by real events.
-  Initial seed = real events that happened on existing issues.
-  NO random generation. NO setInterval that fires fake data.
-  New notifications only added by: reportIssue, assignIssue, resolveIssue, completeTask.
-*/
-const INITIAL_NOTIFICATIONS = [
-    {
-        id: 1, title: 'New Issue Reported', type: 'medium', read: true,
-        desc: 'RPT-011 — Edge Damage reported at SH-8, Jaipur',
-        time: '3 hr ago', actionPage: 'reports', actionLabel: 'View Report', actionId: 'RPT-011'
-    },
-    {
-        id: 2, title: 'Issue Assigned', type: 'info', read: true,
-        desc: 'RPT-002 — Cracking on Ring Road, Delhi assigned to Priya Sharma',
-        time: '5 hr ago', actionPage: 'issues', actionLabel: 'View Issue', actionId: 'RPT-002'
-    },
-    {
-        id: 3, title: 'Issue Resolved', type: 'low', read: false,
-        desc: 'RPT-003 — Rutting on SH-3, Pune marked as resolved',
-        time: '1 hr ago', actionPage: 'reports', actionLabel: 'View Report', actionId: 'RPT-003'
-    },
-    {
-        id: 4, title: 'New Issue Reported', type: 'critical', read: false,
-        desc: 'RPT-015 — Flooding at Sector 22, Chandigarh (Critical)',
-        time: '2 hr ago', actionPage: 'reports', actionLabel: 'View Report', actionId: 'RPT-015'
-    },
-    {
-        id: 5, title: 'Issue Assigned', type: 'info', read: true,
-        desc: 'RPT-005 — Edge Damage on NH-44, Nagpur assigned to Ramesh Kumar',
-        time: '1 day ago', actionPage: 'issues', actionLabel: 'View Issue', actionId: 'RPT-005'
-    },
-];
+// Aliased helper for backward compatibility
+function apiRequest(endpoint, options = {}) {
+    return RoadPulseAPI.request(endpoint, options);
+}
 
-const MOCK_WORKERS = [
-    { id: 'w1', name: 'Ramesh Kumar', zone: 'Mumbai, Maharashtra', assigned: 5, completed: 23, avatar: 'R', status: 'active' },
-    { id: 'w2', name: 'Priya Sharma', zone: 'Delhi NCR', assigned: 3, completed: 41, avatar: 'P', status: 'active' },
-    { id: 'w3', name: 'Arjun Patel', zone: 'Ahmedabad, Gujarat', assigned: 2, completed: 18, avatar: 'A', status: 'active' },
-    { id: 'w4', name: 'Sneha Reddy', zone: 'Bangalore, Karnataka', assigned: 6, completed: 35, avatar: 'S', status: 'active' },
-    { id: 'w5', name: 'Vikram Singh', zone: 'Lucknow, Uttar Pradesh', assigned: 4, completed: 29, avatar: 'V', status: 'idle' },
-    { id: 'w6', name: 'Meena Nair', zone: 'Chennai, Tamil Nadu', assigned: 1, completed: 52, avatar: 'M', status: 'active' },
-];
-
-/* ─────────────────────────────────────────────────────────────
-   APP STATE
-───────────────────────────────────────────────────────────── */
 const S = {
     user: null, role: null, currentPage: 'dashboard',
-    notifications: [...INITIAL_NOTIFICATIONS],
-    issues: [...MOCK_ISSUES],
+    notifications: [],
+    issues: [],
+    workers: [],
+    users: [],
+    stats: {},
+    trends: [],
     charts: {}, maps: { dash: null, full: null },
     mapMarkers: [],
-    /* FIX 1: NO pollingInterval for fake notifications */
     theme: 'dark',
     sidebarCollapsed: false,
     notifFilter: 'all',
-    /* FIX 3: global state filter */
     activeState: '',
     reportPage: 1, issuesPage: 1, ROWS: 8,
 };
+
 
 /* ─────────────────────────────────────────────────────────────
    UTILITIES
@@ -198,38 +185,47 @@ function initLogin() {
     $('anon-btn').addEventListener('click', () => loginAs({ role: 'anonymous', name: 'Guest', email: '', avatar: 'G', username: 'anonymous' }));
 }
 
-function doLogin() {
+async function doLogin() {
     const u = $('login-username').value.trim();
     const p = $('login-password').value;
     if (!u || !p) { showLoginErr('Please enter username and password'); return; }
-    $('login-btn-text').textContent = 'Signing in…';
+    $('login-btn-text').textContent = 'Signing in...';
     $('login-spinner').style.display = 'block';
     $('login-btn').disabled = true;
 
-    setTimeout(() => {
+    try {
+        const res = await RoadPulseAPI.auth.login(u, p);
         $('login-btn-text').textContent = 'Sign In';
         $('login-spinner').style.display = 'none';
         $('login-btn').disabled = false;
-        const user = USERS[u];
-        if (!user || user.password !== p) { showLoginErr('Invalid username or password'); return; }
-        const token = btoa(JSON.stringify({ u, role: user.role, exp: Date.now() + 86400000 }));
+
+        const token = res.access_token || res.token;
+        const role = res.role || 'user';
+        const user = { username: u, role, name: u, email: `${u}@roadpulse.ai`, avatar: u[0].toUpperCase() };
+
         localStorage.setItem('rp_token', token);
-        localStorage.setItem('rp_user', JSON.stringify({ ...user, username: u }));
-        loginAs({ ...user, username: u });
-    }, 700);
+        localStorage.setItem('rp_user', JSON.stringify(user));
+        loginAs(user);
+    } catch (err) {
+        $('login-btn-text').textContent = 'Sign In';
+        $('login-spinner').style.display = 'none';
+        $('login-btn').disabled = false;
+        showLoginErr(err.message || 'Invalid username or password');
+    }
 }
 
 function showLoginErr(m) {
     const e = $('login-error');
+    if (!e) return;
     e.textContent = m;
     e.style.display = 'block';
 }
 
 function loginAs(user) {
     S.user = user; S.role = user.role;
-    $('login-error').style.display = 'none';
-    $('login-screen').style.display = 'none';
-    $('app').style.display = 'flex';
+    if ($('login-error')) $('login-error').style.display = 'none';
+    if ($('login-screen')) $('login-screen').style.display = 'none';
+    if ($('app')) $('app').style.display = 'flex';
     setupRoleUI();
     initApp();
 }
@@ -240,29 +236,37 @@ function logout() {
     Object.values(S.charts).forEach(c => { try { c.destroy(); } catch { } });
     S.charts = {}; S.maps = { dash: null, full: null };
     S.user = null; S.role = null; S.activeState = '';
-    $('app').style.display = 'none';
-    $('login-screen').style.display = 'flex';
-    $('anon-banner').style.display = 'none';
-    $('login-username').value = '';
-    $('login-password').value = '';
-    $('login-error').style.display = 'none';
+    if ($('app')) $('app').style.display = 'none';
+    if ($('login-screen')) $('login-screen').style.display = 'flex';
+    if ($('anon-banner')) $('anon-banner').style.display = 'none';
+    if ($('login-username')) $('login-username').value = '';
+    if ($('login-password')) $('login-password').value = '';
+    if ($('login-error')) $('login-error').style.display = 'none';
 }
 
-function checkAutoLogin() {
+async function checkAutoLogin() {
     const tok = localStorage.getItem('rp_token');
     if (!tok) return false;
     try {
-        const d = JSON.parse(atob(tok));
-        if (d.exp < Date.now()) { localStorage.clear(); return false; }
-        const u = JSON.parse(localStorage.getItem('rp_user') || '{}');
-        loginAs(u);
+        const me = await RoadPulseAPI.auth.me();
+        const user = {
+            username: me.username,
+            role: me.role,
+            name: me.username,
+            email: `${me.username}@roadpulse.ai`,
+            avatar: me.username[0].toUpperCase(),
+        };
+        localStorage.setItem('rp_user', JSON.stringify(user));
+        loginAs(user);
         return true;
-    } catch { return false; }
+    } catch {
+        localStorage.removeItem('rp_token');
+        localStorage.removeItem('rp_user');
+        return false;
+    }
 }
 
-/* ─────────────────────────────────────────────────────────────
-   ROLE UI SETUP
-───────────────────────────────────────────────────────────── */
+
 function setupRoleUI() {
     const { role, user } = S;
     const label = ROLE_LABELS[role] || role;
@@ -277,6 +281,9 @@ function setupRoleUI() {
     // Sidebar
     $('sidebar-username').textContent = user.name || 'User';
     $('sidebar-role-pill').textContent = role;
+    if ($('tab-btn-users')) {
+        $('tab-btn-users').style.display = role === 'admin' ? 'flex' : 'none';
+    }
     $('sidebar-avatar').textContent = user.avatar || 'U';
 
     // Role pill colors
@@ -400,6 +407,69 @@ window.navigateTo = function (page) {
 /* ─────────────────────────────────────────────────────────────
    APP INIT
 ───────────────────────────────────────────────────────────── */
+async function loadLiveBackendData() {
+    try {
+        const [defectsRes, statsRes, workersRes] = await Promise.all([
+            RoadPulseAPI.defects.list({ limit: 500 }).catch(() => null),
+            RoadPulseAPI.dashboard.stats().catch(() => null),
+            S.role === 'admin' ? RoadPulseAPI.admin.workers().catch(() => []) : Promise.resolve([]),
+        ]);
+
+        if (defectsRes && defectsRes.defects && defectsRes.defects.length > 0) {
+            S.issues = defectsRes.defects.map(d => ({
+                id: `DEF-${String(d.id).padStart(3, '0')}`,
+                dbId: d.id,
+                type: d.defect_type,
+                location: d.road_name || 'Highway Survey Sector',
+                state: d.state || 'Maharashtra',
+                severity: (d.severity ? d.severity.toLowerCase() : 'low'),
+                reporter: d.reported_by ? `User #${d.reported_by}` : 'AI Detection Engine',
+                date: d.timestamp ? d.timestamp.split('T')[0] : new Date().toISOString().split('T')[0],
+                status: d.is_resolved ? 'resolved' : (d.status === 'in_progress' ? 'in-progress' : 'pending'),
+                lat: d.latitude || 19.0760,
+                lng: d.longitude || 72.8777,
+                image: d.annotated_image_path || d.image_path || null,
+                cost: d.repair_cost || 0,
+                area: d.estimated_area_sqm || 0,
+                raw: d,
+            }));
+        } else {
+            S.issues = [];
+        }
+
+        if (statsRes) {
+            S.stats = statsRes;
+        }
+
+        if (workersRes && Array.isArray(workersRes)) {
+            S.workers = workersRes.map(w => ({
+                id: `w${w.id}`,
+                dbId: w.id,
+                name: w.username,
+                zone: 'Assigned Regional Zone',
+                assigned: 0,
+                completed: 0,
+                avatar: w.username[0].toUpperCase(),
+                status: w.is_active ? 'active' : 'idle',
+            }));
+        }
+
+        populateStateFilters();
+        populateAssignModal();
+        renderKPIs();
+        renderMiniIssues();
+        renderLiveDetection();
+        renderReportsTable();
+        renderIssuesTable();
+        if (S.currentPage === 'workers') renderWorkers();
+        if (S.currentPage === 'analytics') initAnalyticsCharts();
+        refreshMap('dash');
+        refreshMap('full');
+    } catch (e) {
+        console.warn('[Dashboard] Could not load live data:', e);
+    }
+}
+
 function initApp() {
     setTimeout(() => {
         lucide.createIcons();
@@ -411,7 +481,7 @@ function initApp() {
         navigateTo(firstPage);
 
         renderNotifDD();
-        /* FIX 1: NO setInterval for fake notifications — removed completely */
+        loadLiveBackendData();
     }, 60);
 }
 
@@ -563,13 +633,38 @@ function bindEvents() {
     /* FIX 5: Assign Work — admin only (button is already hidden for others via setupRoleUI) */
     $('btn-assign-work').addEventListener('click', () => {
         if (S.role !== 'admin') { toast('Admin access required', 'error'); return; }
-        openModal('assign-modal');
+        openAssignFor();
     });
     $('confirm-assign').addEventListener('click', handleAssign);
     $('btn-bulk-assign').addEventListener('click', () => {
         if (S.role !== 'admin') { toast('Admin access required', 'error'); return; }
-        openModal('assign-modal');
+        openAssignFor();
     });
+
+    /* User Management */
+    if ($('tab-btn-users')) {
+        $('tab-btn-users').addEventListener('click', () => {
+            renderUsersTable();
+        });
+    }
+    if ($('btn-open-create-user')) {
+        $('btn-open-create-user').addEventListener('click', () => {
+            const errBox = $('create-user-error');
+            if (errBox) errBox.style.display = 'none';
+            openModal('create-user-modal');
+        });
+    }
+    if ($('btn-add-worker')) {
+        $('btn-add-worker').addEventListener('click', () => {
+            if ($('new-user-role')) $('new-user-role').value = 'worker';
+            const errBox = $('create-user-error');
+            if (errBox) errBox.style.display = 'none';
+            openModal('create-user-modal');
+        });
+    }
+    if ($('btn-submit-create-user')) {
+        $('btn-submit-create-user').addEventListener('click', handleCreateUser);
+    }
 
     /* Modals */
     $a('.modal-close-btn').forEach(b => b.addEventListener('click', () => closeModal(b.dataset.modal)));
@@ -1258,19 +1353,43 @@ function renderPagination(elId, cur, total, cb) {
 window.openIssueDetail = function (id) {
     const i = S.issues.find(x => x.id === id); if (!i) return;
     $('issue-detail-title').textContent = `${i.id} — ${i.type}`;
+    const raw = i.raw || {};
+    const costBreakdown = raw.detailed_cost_breakdown || {};
+    const cbItems = costBreakdown.cost_breakdown || {};
+
+    let costSection = '';
+    if (i.cost > 0) {
+        costSection = `
+        <div style="grid-column:span 2;background:rgba(255,255,255,.03);padding:14px;border-radius:var(--r);border:1px solid var(--border);margin-top:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:.78rem;font-weight:700;color:var(--text-secondary)">CALIBRATED REPAIR COST (CPWD / MoRTH)</span>
+            <span style="font-size:1.15rem;font-weight:800;color:var(--accent)">₹${i.cost.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:.75rem">
+            <div><span style="color:var(--text-muted)">Materials (50%):</span> ₹${(cbItems.material_cost_inr || i.cost*0.5).toFixed(2)}</div>
+            <div><span style="color:var(--text-muted)">Labour (20%):</span> ₹${(cbItems.labour_cost_inr || i.cost*0.2).toFixed(2)}</div>
+            <div><span style="color:var(--text-muted)">Equipment (11.8%):</span> ₹${(cbItems.equipment_cost_inr || i.cost*0.118).toFixed(2)}</div>
+            <div><span style="color:var(--text-muted)">Contractor OH&P (14%):</span> ₹${(cbItems.contractor_overhead_profit_inr || i.cost*0.127).toFixed(2)}</div>
+          </div>
+          ${costBreakdown.engineering_disclaimer ? `<div style="font-size:.68rem;color:var(--text-muted);margin-top:8px;font-style:italic">⚠️ ${costBreakdown.engineering_disclaimer}</div>` : ''}
+        </div>`;
+    }
+
     const imgSection = i.image
-        ? `<img src="${i.image}" style="width:100%;height:160px;object-fit:cover;border-radius:var(--r);border:1px solid var(--border);margin-bottom:14px;display:block" alt="Photo"/>`
+        ? `<img src="${i.image}" style="width:100%;max-height:220px;object-fit:cover;border-radius:var(--r);border:1px solid var(--border);margin-bottom:14px;display:block" alt="Distress Overlay"/>`
         : '';
+
     $('issue-detail-body').innerHTML = `
     ${imgSection}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
       ${df('Type', i.type)}${df('Severity', sevTag(i.severity))}
       ${df('Location', i.location)}${df('State', i.state)}
       ${df('Reporter', i.reporter)}${df('Date', fmtDate(i.date))}
-      ${df('Status', statusTag(i.status))}${df('Coordinates', i.lat ? `${i.lat.toFixed(4)}, ${i.lng.toFixed(4)}` : 'N/A')}
+      ${df('Surface Area', (i.area ? `${i.area.toFixed(4)} m²` : 'N/A'))}${df('Status', statusTag(i.status))}
+      ${df('Coordinates', i.lat ? `${i.lat.toFixed(4)}, ${i.lng.toFixed(4)}` : 'N/A')}${df('Database ID', i.dbId ? `#${i.dbId}` : 'N/A')}
+      ${costSection}
     </div>`;
 
-    /* FIX 5: Assign button only for admin */
     $('issue-detail-assign').style.display = S.role === 'admin' ? 'inline-flex' : 'none';
     $('issue-detail-assign').onclick = () => { closeModal('issue-detail-modal'); openAssignFor(id); };
 
@@ -1286,32 +1405,40 @@ function df(label, val) {
 ───────────────────────────────────────────────────────────── */
 function renderWorkers() {
     const summary = $('workers-summary-bar');
-    if (summary && !summary.innerHTML) {
-        const active = MOCK_WORKERS.filter(w => w.status === 'active').length;
-        const totalA = MOCK_WORKERS.reduce((a, w) => a + w.assigned, 0);
-        const totalD = MOCK_WORKERS.reduce((a, w) => a + w.completed, 0);
+    const workers = S.workers || [];
+    const active = workers.filter(w => w.status === 'active').length;
+    const totalA = workers.reduce((a, w) => a + (w.assigned || 0), 0);
+    const totalD = workers.reduce((a, w) => a + (w.completed || 0), 0);
+    if (summary) {
         summary.innerHTML = [
-            { num: MOCK_WORKERS.length, lbl: 'Total Workers' },
-            { num: active, lbl: 'Active' },
+            { num: workers.length, lbl: 'Total Workers' },
+            { num: active, lbl: 'Active Crews' },
             { num: totalA, lbl: 'Assigned Tasks' },
             { num: totalD, lbl: 'Tasks Completed' },
         ].map(k => `<div class="workers-summary-card"><div class="ws-num">${k.num}</div><div class="ws-lbl">${k.lbl}</div></div>`).join('');
     }
     const grid = $('workers-grid'); if (!grid) return;
-    grid.innerHTML = MOCK_WORKERS.map(w => `
+    if (workers.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted)">
+            <i data-lucide="hard-hat" style="display:block;margin:0 auto 12px;opacity:0.4;width:36px;height:36px"></i>
+            No field workers registered yet. Administrators can provision crew accounts in Settings → User Management.
+        </div>`;
+        lucide.createIcons({ nodes: [grid] });
+        return;
+    }
+    grid.innerHTML = workers.map(w => `
     <div class="worker-card">
-      <div class="worker-avatar">${w.avatar}</div>
+      <div class="worker-avatar">${w.avatar || (w.name ? w.name[0].toUpperCase() : 'W')}</div>
       <div class="worker-name">${w.name}</div>
-      <div class="worker-zone">${w.zone}</div>
+      <div class="worker-zone">${w.zone || 'Field Division'}</div>
       <div class="worker-stats">
-        <div class="worker-stat"><span>${w.assigned}</span><small>Assigned</small></div>
-        <div class="worker-stat"><span>${w.completed}</span><small>Completed</small></div>
+        <div class="worker-stat"><span>${w.assigned || 0}</span><small>Assigned</small></div>
+        <div class="worker-stat"><span>${w.completed || 0}</span><small>Completed</small></div>
       </div>
       <div class="worker-status">
         <div class="live-pulse" style="${w.status === 'idle' ? 'background:var(--medium)' : ''}"></div>
         <span style="color:${w.status === 'active' ? 'var(--low)' : 'var(--medium)'};font-size:.76rem">${w.status === 'active' ? 'Active' : 'Idle'}</span>
       </div>
-      <!-- FIX 5: Assign task button — admin only -->
       ${S.role === 'admin'
             ? `<button class="btn-sm" style="margin-top:10px;width:100%;justify-content:center" onclick="openAssignFor(null,'${w.id}')"><i data-lucide="plus"></i> Assign Task</button>`
             : ''}
@@ -1319,13 +1446,14 @@ function renderWorkers() {
     lucide.createIcons({ nodes: [grid] });
 }
 
-/* ─────────────────────────────────────────────────────────────
-   FIX 1: REAL NOTIFICATION SYSTEM
-   Notifications ONLY created inside these 3 real events:
-   1. handleReportSubmit → New Issue Reported
-   2. handleAssign → Issue Assigned
-   3. resolveIssue / btn-complete → Issue Resolved / Task Completed
-───────────────────────────────────────────────────────────── */
+function populateAssignModal() {
+    const sel = $('assign-worker-select');
+    if (!sel) return;
+    const workers = S.workers || [];
+    sel.innerHTML = '<option value="">Choose worker…</option>' +
+        workers.map(w => `<option value="${w.id}">${w.name} — ${w.zone || 'Field Crew'}</option>`).join('');
+}
+
 function pushRealNotif({ title, desc, type = 'info', actionPage = null, actionLabel = null, actionId = null }) {
     const notif = {
         id: Date.now(),
@@ -1455,57 +1583,105 @@ function markAllRead() {
    REPORT SUBMIT
    FIX 1: Creates a real notification on submit
 ───────────────────────────────────────────────────────────── */
-function handleReportSubmit() {
+async function handleReportSubmit() {
     const type = $('report-type').value;
     const sev = $('report-severity').value;
     const loc = $('report-location').value.trim();
     if (!type || !sev || !loc) { toast('Fill required fields: type, severity, location', 'error'); return; }
 
     const state = $('report-state').value || 'Other';
-    const name = $('report-name').value.trim() || 'Anonymous';
+    const name = $('report-name').value.trim() || S.user?.name || 'Citizen User';
     const desc = $('report-desc').value.trim();
-    const newId = `RPT-${String(S.issues.length + 1).padStart(3, '0')}`;
-    const imgPreview = $('report-image-preview').querySelector('img');
-    const imageUrl = imgPreview ? imgPreview.src : null;
+    const fileInput = $('report-image-input');
+    const file = fileInput?.files?.[0];
 
-    const newIssue = {
-        id: newId, type, severity: sev, location: loc, state,
-        reporter: name, desc,
-        date: new Date().toISOString().split('T')[0],
-        status: 'pending',
-        lat: 20 + (Math.random() - .5) * 14,
-        lng: 79 + (Math.random() - .5) * 14,
-        image: imageUrl,
-    };
+    const submitBtn = $('submit-report');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting & Analyzing...';
+    }
 
-    S.issues.unshift(newIssue);
-    populateStateFilters();
+    try {
+        let imageUrl = null;
+        let detectedType = type;
+        let detectedSeverity = sev;
+        let detectedCost = 0;
 
-    /* FIX 1: Real notification — new issue reported */
-    pushRealNotif({
-        title: 'New Issue Reported',
-        desc: `${type} at ${loc}, ${state} (${newId}) — ${sev} severity`,
-        type: sevClass(sev),
-        actionPage: 'reports',
-        actionLabel: 'View Report',
-        actionId: newId,
-    });
+        if (file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('road_name', loc);
+            formData.append('region', state);
+            formData.append('save_results', 'true');
 
-    pushFeedItem(`New ${type} reported at ${loc}, ${state}`, sevClass(sev));
+            const res = await apiRequest('/api/detect', {
+                method: 'POST',
+                body: formData,
+            });
 
-    // Reset form
-    ['report-type', 'report-severity', 'report-state'].forEach(id => $(id).value = '');
-    ['report-location', 'report-name', 'report-desc'].forEach(id => $(id).value = '');
-    $('report-image-preview').style.display = 'none';
-    $('report-image-preview').innerHTML = '';
-    $('report-form-card').style.display = 'none';
+            if (res.success) {
+                imageUrl = res.annotated_image_url || res.image_url;
+                if (res.detections && res.detections.length > 0) {
+                    const top = res.detections[0];
+                    detectedType = top.class_name || type;
+                    detectedSeverity = (top.severity && top.severity !== 'N/A') ? top.severity.toLowerCase() : sev;
+                    detectedCost = top.repair_cost ? top.repair_cost.cost : 0;
+                }
+            }
+        }
 
-    renderReportsTable();
-    renderKPIs();
-    renderStateBars();
-    renderMiniIssues();
+        const newId = `RPT-${String(S.issues.length + 1).padStart(3, '0')}`;
+        const newIssue = {
+            id: newId,
+            type: detectedType,
+            severity: detectedSeverity,
+            location: loc,
+            state,
+            reporter: name,
+            desc,
+            date: new Date().toISOString().split('T')[0],
+            status: 'pending',
+            lat: 19.0760 + (Math.random() - .5) * 4,
+            lng: 72.8777 + (Math.random() - .5) * 4,
+            image: imageUrl,
+            cost: detectedCost,
+        };
 
-    toast(`Report ${newId} submitted successfully!`, 'success');
+        S.issues.unshift(newIssue);
+        populateStateFilters();
+
+        pushRealNotif({
+            title: 'New Issue Reported',
+            desc: `${detectedType} at ${loc}, ${state} (${newId}) — ${detectedSeverity} severity`,
+            type: sevClass(detectedSeverity),
+            actionPage: 'reports',
+            actionLabel: 'View Report',
+            actionId: newId,
+        });
+
+        pushFeedItem(`New ${detectedType} analyzed & reported at ${loc}, ${state}`, sevClass(detectedSeverity));
+
+        // Reset form
+        ['report-type', 'report-severity', 'report-state'].forEach(id => $(id).value = '');
+        ['report-location', 'report-name', 'report-desc'].forEach(id => $(id).value = '');
+        if (fileInput) fileInput.value = '';
+        $('report-image-preview').style.display = 'none';
+        $('report-image-preview').innerHTML = '';
+        $('report-form-card').style.display = 'none';
+
+        renderReportsTable();
+        renderKPIs();
+        renderStateBars();
+        renderMiniIssues();
+        toast(`Defect analyzed and reported (${detectedType})!`, 'success');
+    } catch (err) {
+        toast(`Submission failed: ${err.message}`, 'error');
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Report';
+        }
+    }
 }
 
 function showImgPreview(f) {
@@ -1545,6 +1721,7 @@ function detectLoc() {
    FIX 5: Only admin can reach this function
 ───────────────────────────────────────────────────────────── */
 window.openAssignFor = function (issueId, workerId) {
+    populateAssignModal();
     /* FIX 5: Guard — should never be called for non-admin but double-check */
     if (S.role !== 'admin') { toast('Admin access required', 'error'); return; }
 
@@ -1557,66 +1734,65 @@ window.openAssignFor = function (issueId, workerId) {
     openModal('assign-modal');
 };
 
-function handleAssign() {
-    /* FIX 5: Guard */
+async function handleAssign() {
     if (S.role !== 'admin') { toast('Admin access required', 'error'); return; }
 
     const issueId = $('assign-issue-select').value;
     const workerId = $('assign-worker-select').value;
+    const priority = $('assign-priority') ? $('assign-priority').value : 'normal';
+    const notes = $('assign-notes') ? $('assign-notes').value.trim() : '';
     if (!issueId || !workerId) { toast('Select both an issue and a worker', 'error'); return; }
 
     const iss = S.issues.find(i => i.id === issueId);
-    const wkr = MOCK_WORKERS.find(w => w.id === workerId);
-    if (iss) { iss.status = 'in-progress'; iss.assignedTo = wkr?.name; }
+    const dbIssueId = iss?.dbId || parseInt(String(issueId).replace(/\D/g, '')) || 1;
+    const numWorkerId = parseInt(String(workerId).replace(/\D/g, '')) || 1;
+    const wkr = S.workers.find(w => w.id === workerId || w.dbId === numWorkerId);
 
-    /* FIX 1: Real notification — issue assigned */
-    pushRealNotif({
-        title: 'Issue Assigned',
-        desc: `${iss?.type} at ${iss?.location} (${issueId}) assigned to ${wkr?.name}`,
-        type: 'info',
-        actionPage: 'issues',
-        actionLabel: 'View Issue',
-        actionId: issueId,
-    });
-
-    pushFeedItem(`${iss?.type} at ${iss?.location} assigned to ${wkr?.name}`, 'info');
-    closeModal('assign-modal');
-    renderIssuesTable();
-    renderReportsTable();
-    renderMiniIssues();
-    toast(`Issue ${issueId} assigned to ${wkr?.name}`, 'success');
+    try {
+        await RoadPulseAPI.admin.assign(dbIssueId, numWorkerId, notes ? `${notes} (Priority: ${priority})` : `Priority: ${priority}`);
+        if (iss) { iss.status = 'in-progress'; iss.assignedTo = wkr?.name || `Worker #${numWorkerId}`; }
+        closeModal('assign-modal');
+        renderIssuesTable();
+        renderReportsTable();
+        renderMiniIssues();
+        toast(`Issue ${issueId} assigned to ${wkr?.name || 'Worker'}`, 'success');
+        loadLiveBackendData();
+    } catch (err) {
+        toast(`Assignment error: ${err.message}`, 'error');
+    }
 }
 
-/* ─────────────────────────────────────────────────────────────
-   RESOLVE ISSUE
-   FIX 1: Creates real notification on resolve
-   FIX 5: Only admin can directly resolve from table
-───────────────────────────────────────────────────────────── */
-window.resolveIssue = function (id) {
+window.resolveIssue = async function (id) {
     if (S.role !== 'admin') { toast('Admin access required', 'error'); return; }
     const i = S.issues.find(x => x.id === id); if (!i) return;
-    i.status = 'resolved';
+    try {
+        const dbId = i.dbId || parseInt(String(id).replace(/\D/g, ''));
+        if (dbId) {
+            await RoadPulseAPI.request(`/api/defects/${dbId}/status`, {
+                method: 'PATCH',
+                body: JSON.stringify({ issue_id: dbId, status: 'completed', notes: 'Marked resolved via admin panel' })
+            }).catch(() => null);
+        }
+        await RoadPulseAPI.repairs.create({
+            road_name: i.location || 'Highway Sector',
+            status: 'approved',
+            defects_resolved: 1,
+            cost_saved: i.cost || 0,
+            admin_notes: `Marked resolved via administrative panel for issue ${id}.`,
+        }).catch(() => null);
 
-    /* FIX 1: Real notification — issue resolved */
-    pushRealNotif({
-        title: 'Issue Resolved',
-        desc: `${i.type} at ${i.location} (${id}) has been marked as resolved`,
-        type: 'low',
-        actionPage: 'reports',
-        actionLabel: 'View Report',
-        actionId: id,
-    });
-
-    pushFeedItem(`${i.type} at ${i.location} resolved`, 'low');
-    renderIssuesTable();
-    renderReportsTable();
-    renderKPIs();
-    toast(`Issue ${id} marked as resolved`, 'success');
+        i.status = 'resolved';
+        renderIssuesTable();
+        renderReportsTable();
+        renderMiniIssues();
+        renderKPIs();
+        toast(`Issue ${id} marked as resolved!`, 'success');
+        loadLiveBackendData();
+    } catch (err) {
+        toast(`Error resolving issue: ${err.message}`, 'error');
+    }
 };
 
-/* ─────────────────────────────────────────────────────────────
-   MODALS
-───────────────────────────────────────────────────────────── */
 function openModal(id) { const m = $(id); if (m) m.style.display = 'flex'; }
 function closeModal(id) { const m = $(id); if (m) m.style.display = 'none'; }
 
@@ -1664,3 +1840,84 @@ document.addEventListener('DOMContentLoaded', () => {
         $('app').style.display = 'none';
     }
 });
+
+/* ─────────────────────────────────────────────────────────────
+   USER MANAGEMENT (Admin)
+───────────────────────────────────────────────────────────── */
+async function renderUsersTable() {
+    const tbody = $('users-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">Loading user records...</td></tr>';
+    try {
+        const users = await RoadPulseAPI.admin.users();
+        S.users = users;
+        if (!users || users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">No user accounts registered.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = users.map(u => `
+        <tr>
+          <td><strong>#${u.id}</strong></td>
+          <td><div style="display:flex;align-items:center;gap:8px"><div class="worker-avatar" style="width:24px;height:24px;font-size:.7rem">${u.username[0].toUpperCase()}</div>${u.username}</div></td>
+          <td><span class="role-pill role-${u.role}">${u.role}</span></td>
+          <td><span class="status-pill status-${u.is_active ? 'completed' : 'pending'}">${u.is_active ? 'Active' : 'Deactivated'}</span></td>
+          <td>${u.created_at ? u.created_at.split('T')[0] : 'N/A'}</td>
+          <td>
+            ${u.username !== S.user?.username ? `
+            <button class="btn-sm" onclick="toggleUserStatus(${u.id})" title="${u.is_active ? 'Deactivate' : 'Activate'}">
+              <i data-lucide="${u.is_active ? 'user-x' : 'user-check'}"></i> ${u.is_active ? 'Deactivate' : 'Activate'}
+            </button>` : '<span style="color:var(--text-muted);font-size:.75rem">Current Account</span>'}
+          </td>
+        </tr>`).join('');
+        lucide.createIcons({ nodes: [tbody] });
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--critical)">Failed to load users: ${err.message}</td></tr>`;
+    }
+}
+
+window.toggleUserStatus = async function (id) {
+    if (S.role !== 'admin') return;
+    try {
+        await RoadPulseAPI.admin.toggleUser(id);
+        toast(`User status updated successfully.`, 'success');
+        renderUsersTable();
+    } catch (err) {
+        toast(`Error: ${err.message}`, 'error');
+    }
+};
+
+async function handleCreateUser() {
+    if (S.role !== 'admin') return;
+    const u = $('new-user-username').value.trim();
+    const r = $('new-user-role').value;
+    const p = $('new-user-password').value;
+    const errBox = $('create-user-error');
+    errBox.style.display = 'none';
+
+    if (!u || !p) {
+        errBox.textContent = 'Username and password are required.';
+        errBox.style.display = 'block';
+        return;
+    }
+    const btn = $('btn-submit-create-user');
+    btn.disabled = true;
+    btn.textContent = 'Creating...';
+
+    try {
+        await RoadPulseAPI.admin.createUser({ username: u, role: r, password: p });
+        toast(`Account '${u}' (${r}) created successfully!`, 'success');
+        closeModal('create-user-modal');
+        $('new-user-username').value = '';
+        $('new-user-password').value = '';
+        renderUsersTable();
+        await loadLiveBackendData();
+        if (S.currentPage === 'workers') renderWorkers();
+    } catch (err) {
+        errBox.textContent = err.message || 'Failed to create user.';
+        errBox.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="check"></i> Create Account';
+        lucide.createIcons({ nodes: [btn] });
+    }
+}

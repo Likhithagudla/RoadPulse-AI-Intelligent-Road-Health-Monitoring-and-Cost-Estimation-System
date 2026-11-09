@@ -1,3 +1,4 @@
+from pathlib import Path
 import os
 import requests
 import zipfile
@@ -6,7 +7,7 @@ import kaggle
 
 # --- CONFIGURATION ---
 ROBOFLOW_API_KEY = "RPOBmjD1UhE2l7j05cCv"
-SAVE_PATH = "D:/Road_AI_Project/ai_models/dataset"
+SAVE_PATH = str(Path(__file__).resolve().parent.parent / "ai_models/dataset")
 os.makedirs(SAVE_PATH, exist_ok=True)
 
 # 1. KAGGLE DATASETS (Terms must be accepted on website first)

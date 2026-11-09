@@ -4,21 +4,60 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 class ApiService {
-  // Use for physical device via USB (requires 'adb reverse tcp:8000 tcp:8000')
-  static const String baseUrl = "http://127.0.0.1:8000";
-  
-  // Track the logged in user
+  // Configurable base URL: can be passed via --dart-define=ROAD_PULSE_API_URL=...
+  // or dynamically updated with setBaseUrl(...)
+  static String baseUrl = const String.fromEnvironment(
+    'ROAD_PULSE_API_URL',
+    defaultValue: 'http://10.0.2.2:8000',
+  );
+
+  static void setBaseUrl(String newUrl) {
+    if (newUrl.trim().isNotEmpty) {
+      String url = newUrl.trim();
+      baseUrl = url.endsWith('/') ? url.substring(0, url.length - 1) : url;
+    }
+  }
+
+  // Session state and JWT Bearer token
   static String? currentUsername;
+  static String? currentUserRole;
+  static String? authToken;
+  static Function()? onSessionExpired;
+
+  static void clearSession() {
+    authToken = null;
+    currentUsername = null;
+    currentUserRole = null;
+  }
+
+  Map<String, String> _authHeaders({Map<String, String>? additionalHeaders}) {
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    if (authToken != null) {
+      headers['Authorization'] = 'Bearer $authToken';
+    }
+    if (additionalHeaders != null) {
+      headers.addAll(additionalHeaders);
+    }
+    return headers;
+  }
 
   Future<Map<String, dynamic>> uploadImage(File imageFile, {
     double? latitude,
     double? longitude,
     String? roadName,
     int? surveyId,
+    String region = "Default",
   }) async {
     try {
       var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/api/detect'));
       
+      if (authToken != null) {
+        request.headers['Authorization'] = 'Bearer $authToken';
+      }
+
       request.files.add(
         await http.MultipartFile.fromPath(
           'file', 
@@ -31,14 +70,16 @@ class ApiService {
       if (longitude != null) request.fields['longitude'] = longitude.toString();
       if (roadName != null) request.fields['road_name'] = roadName;
       if (surveyId != null) request.fields['survey_id'] = surveyId.toString();
+      request.fields['region'] = region;
+      request.fields['save_results'] = 'true';
 
       var streamedResponse = await request.send();
       var response = await http.Response.fromStream(streamedResponse);
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return json.decode(response.body);
       } else {
-        throw Exception('Failed to upload image: ${response.statusCode}');
+        throw Exception('Failed to upload image: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
       throw Exception('Error uploading image: $e');
@@ -49,10 +90,15 @@ class ApiService {
     String? roadName,
     int? surveyId,
     String? gpsData,
+    String region = "Default",
   }) async {
     try {
       var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/api/detect/video'));
       
+      if (authToken != null) {
+        request.headers['Authorization'] = 'Bearer $authToken';
+      }
+
       request.files.add(
         await http.MultipartFile.fromPath(
           'file', 
@@ -64,12 +110,13 @@ class ApiService {
       if (roadName != null) request.fields['road_name'] = roadName;
       if (surveyId != null) request.fields['survey_id'] = surveyId.toString();
       if (gpsData != null) request.fields['gps_data'] = gpsData;
+      request.fields['region'] = region;
       request.fields['frame_interval'] = '15';
 
       var streamedResponse = await request.send();
       var response = await http.Response.fromStream(streamedResponse);
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return json.decode(response.body);
       } else {
         throw Exception('Failed to upload video: ${response.statusCode}');
@@ -81,43 +128,26 @@ class ApiService {
 
   Future<Map<String, dynamic>> login(String username, String password) async {
     try {
-      // 1. Check for Hardcoded Test Credentials (Bypass Server)
-      if (username == 'test123' && password == 'test') {
-        currentUsername = 'test123';
-        return {
-          'message': 'Login successful (Offline Test Mode)',
-          'username': 'test123',
-          'token': 'demo-token-123'
-        };
-      }
-
-      // 2. Otherwise Try Server Login with Timeout
       final response = await http.post(
         Uri.parse('$baseUrl/api/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'username': username,
+          'username': username.trim(),
           'password': password,
         }),
-      ).timeout(const Duration(seconds: 5));
+      ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
-        currentUsername = username;
-        return json.decode(response.body);
+        final data = json.decode(response.body);
+        authToken = data['access_token'] ?? data['token'];
+        currentUserRole = data['role'] ?? 'user';
+        currentUsername = username.trim();
+        return data;
       } else {
         final error = json.decode(response.body);
-        throw Exception(error['detail'] ?? 'Failed to login');
+        throw Exception(error['detail'] ?? error['error']?['message'] ?? 'Failed to login');
       }
     } catch (e) {
-      // 3. Fallback for test account if server is unreachable
-      if (username == 'test123' && password == 'test') {
-        currentUsername = 'test123';
-        return {
-          'message': 'Login successful (Offline Mode)',
-          'username': 'test123',
-          'token': 'demo-token-123'
-        };
-      }
       throw Exception('Login error: $e');
     }
   }
@@ -128,30 +158,33 @@ class ApiService {
         Uri.parse('$baseUrl/api/auth/register'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'username': username,
+          'username': username.trim(),
           'password': password,
         }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return json.decode(response.body);
       } else {
         final error = json.decode(response.body);
-        throw Exception(error['detail'] ?? 'Failed to register');
+        throw Exception(error['detail'] ?? error['error']?['message'] ?? 'Failed to register');
       }
     } catch (e) {
       throw Exception('Registration error: $e');
     }
   }
 
-  Future<List<dynamic>> getDefects() async {
+  Future<List<dynamic>> getDefects({int limit = 50, int offset = 0}) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/api/defects?limit=50'));
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/defects?limit=$limit&offset=$offset'),
+        headers: _authHeaders(),
+      );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return data['defects'];
+        return data['defects'] ?? [];
       } else {
-        throw Exception('Failed to load defects');
+        throw Exception('Failed to load defects (${response.statusCode})');
       }
     } catch (e) {
       throw Exception('Error loading defects: $e');
@@ -159,11 +192,18 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> getStats() async {
-    final response = await http.get(Uri.parse('$baseUrl/api/dashboard/stats'));
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to load stats');
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/dashboard/stats'),
+        headers: _authHeaders(),
+      );
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Failed to load stats (${response.statusCode})');
+      }
+    } catch (e) {
+      throw Exception('Error loading stats: $e');
     }
   }
 
@@ -171,35 +211,39 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/api/surveys'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _authHeaders(),
         body: json.encode({
-          'road_name': roadName,
+          'road_name': roadName.trim(),
           'road_type': roadType,
           'start_latitude': startLat,
           'start_longitude': startLng,
-          'surveyor_name': surveyorName ?? currentUsername ?? 'Mobile User',
+          'surveyor_name': surveyorName ?? currentUsername ?? 'Mobile Surveyor',
         }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final data = json.decode(response.body);
         return data['id'];
       } else {
-        throw Exception('Failed to create survey');
+        final err = json.decode(response.body);
+        throw Exception('Failed to create survey: ${err['detail'] ?? response.statusCode}');
       }
     } catch (e) {
       throw Exception('Error creating survey: $e');
     }
   }
 
-  Future<List<dynamic>> getSurveys() async {
+  Future<List<dynamic>> getSurveys({int limit = 50, int offset = 0}) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/api/surveys?limit=50'));
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/surveys?limit=$limit&offset=$offset'),
+        headers: _authHeaders(),
+      );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return data['surveys'];
+        return data['surveys'] ?? [];
       } else {
-        throw Exception('Failed to load surveys');
+        throw Exception('Failed to load surveys (${response.statusCode})');
       }
     } catch (e) {
       throw Exception('Error loading surveys: $e');
@@ -209,11 +253,13 @@ class ApiService {
   Future<void> updateSurveyStatus(int surveyId, String status) async {
     try {
       final response = await http.patch(
-        Uri.parse('$baseUrl/api/surveys/$surveyId/status?status=$status'),
+        Uri.parse('$baseUrl/api/surveys/$surveyId/status'),
+        headers: _authHeaders(),
+        body: json.encode({'status': status}),
       );
 
       if (response.statusCode != 200) {
-        throw Exception('Failed to update survey status');
+        throw Exception('Failed to update survey status: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Error updating survey status: $e');
@@ -222,25 +268,33 @@ class ApiService {
 
   Future<Map<String, dynamic>> markRoadAsRepaired(String roadName, {int? surveyId, String? surveyorName}) async {
     try {
-      final body = {
-        'road_name': roadName,
-        if (surveyId != null) 'survey_id': surveyId,
-        if (surveyorName != null) 'surveyor_name': surveyorName,
+      final body = <String, dynamic>{
+        'road_name': roadName.trim(),
+        'surveyor_name': surveyorName ?? currentUsername ?? 'Mobile Worker',
       };
+      if (surveyId != null) {
+        body['survey_id'] = surveyId;
+      }
 
       final response = await http.post(
         Uri.parse('$baseUrl/api/repairs'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _authHeaders(),
         body: jsonEncode(body),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return jsonDecode(response.body);
       } else {
-        throw Exception('Failed to mark road as repaired');
+        throw Exception('Failed to mark road as repaired: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Error marking road as repaired: $e');
     }
+  }
+
+  static void logout() {
+    authToken = null;
+    currentUsername = null;
+    currentUserRole = null;
   }
 }

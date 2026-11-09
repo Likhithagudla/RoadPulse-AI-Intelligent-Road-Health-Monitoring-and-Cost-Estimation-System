@@ -1,3 +1,4 @@
+from pathlib import Path
 import sys
 import torch
 import torch.serialization
@@ -12,7 +13,7 @@ except Exception as e:
 from ultralytics import YOLO
 
 try:
-    model = YOLO("D:/Road_AI_Project/ai_models/weights/best.pt")
+    model = YOLO(str(Path(__file__).resolve().parent.parent / "ai_models/weights/best.pt"))
     print("Model loaded successfully.")
     print("Model Names:", model.names)
 except Exception as e:

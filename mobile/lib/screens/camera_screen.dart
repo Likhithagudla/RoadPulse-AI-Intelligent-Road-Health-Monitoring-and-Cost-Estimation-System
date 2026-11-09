@@ -12,7 +12,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:video_player/video_player.dart';
 import '../providers/app_provider.dart';
-import '../services/location_service.dart';
 import '../utils/gpx_utils.dart';
 import 'login_screen.dart';
 import 'recorded_videos_screen.dart';
@@ -305,7 +304,6 @@ class _CameraScreenState extends State<CameraScreen>
       
       if (videoFile == null) return;
 
-      final String gpsDataJson = jsonEncode(_gpsTrack);
       print("[RECORD-DEBUG] Recording stopped. GPS track points: ${_gpsTrack.length}");
       if (_gpsTrack.isNotEmpty) {
         print("[RECORD-DEBUG] First GPS point: ${_gpsTrack.first}");

@@ -457,6 +457,29 @@
                             <div class="card-body no-pad">
                                 <div class="state-bars" id="state-bars"></div>
                             </div>
+                            <div class="settings-panel" id="tab-users">
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                                    <h3 class="settings-panel-title" style="margin-bottom:0">User & Crew Management</h3>
+                                    <button class="btn-primary" id="btn-open-create-user" style="font-size:.8rem;padding:6px 12px"><i data-lucide="user-plus"></i> New User / Worker</button>
+                                </div>
+                                <div class="table-container">
+                                    <table class="data-table" id="users-table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Username</th>
+                                                <th>Role</th>
+                                                <th>Status</th>
+                                                <th>Created</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="users-tbody">
+                                            <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">Loading user records...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -762,6 +785,7 @@
                             <button class="settings-tab" data-tab="notif-pref"><i data-lucide="bell"></i>
                                 Notifications</button>
                             <button class="settings-tab" data-tab="api"><i data-lucide="code-2"></i> API Access</button>
+                            <button class="settings-tab" id="tab-btn-users" data-tab="users" style="display:none"><i data-lucide="users"></i> User Management</button>
                         </div>
                         <div class="settings-content">
                             <div class="settings-panel active" id="tab-profile">
@@ -954,7 +978,7 @@
                             <h2 class="page-title">Worker Management</h2>
                             <p class="page-desc">Monitor field workers and task assignments</p>
                         </div>
-                        <button class="btn-primary"><i data-lucide="user-plus"></i> Add Worker</button>
+                        <button class="btn-primary" id="btn-add-worker"><i data-lucide="user-plus"></i> Add Worker</button>
                     </div>
                     <div class="workers-summary-bar" id="workers-summary-bar"></div>
                     <div class="workers-grid" id="workers-grid"></div>
@@ -1029,12 +1053,6 @@
                 <div class="form-field"><label>Assign to Worker <span class="req">*</span></label>
                     <select class="form-select" id="assign-worker-select">
                         <option value="">Choose worker…</option>
-                        <option value="w1">Ramesh Kumar — Mumbai</option>
-                        <option value="w2">Priya Sharma — Delhi</option>
-                        <option value="w3">Arjun Patel — Ahmedabad</option>
-                        <option value="w4">Sneha Reddy — Bangalore</option>
-                        <option value="w5">Vikram Singh — Lucknow</option>
-                        <option value="w6">Meena Nair — Chennai</option>
                     </select>
                 </div>
                 <div class="form-field"><label>Priority</label>
@@ -1070,7 +1088,41 @@
         </div>
     </div>
 
-    <!-- Toast Stack -->
+    
+    <!-- Create User Modal (Admin) -->
+    <div class="modal-overlay" id="create-user-modal" style="display:none">
+        <div class="modal-card">
+            <div class="modal-head">
+                <h3><i data-lucide="user-plus"></i> Create User Account</h3>
+                <button class="btn-icon modal-close-btn" data-modal="create-user-modal"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-field">
+                    <label>Username <span class="req">*</span></label>
+                    <input type="text" class="form-input" id="new-user-username" placeholder="e.g. worker_pune" />
+                </div>
+                <div class="form-field">
+                    <label>Role <span class="req">*</span></label>
+                    <select class="form-select" id="new-user-role">
+                        <option value="worker">Field Worker (Task Execution)</option>
+                        <option value="admin">Administrator (Full Control)</option>
+                        <option value="user">Citizen User (Reporting Only)</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Password <span class="req">*</span></label>
+                    <input type="password" class="form-input" id="new-user-password" placeholder="Min 8 chars, uppercase, lowercase, digit" />
+                </div>
+                <div id="create-user-error" style="color:var(--critical);font-size:.78rem;display:none;margin-top:6px"></div>
+            </div>
+            <div class="modal-foot">
+                <button class="btn-ghost modal-close-btn" data-modal="create-user-modal">Cancel</button>
+                <button class="btn-primary" id="btn-submit-create-user"><i data-lucide="check"></i> Create Account</button>
+            </div>
+        </div>
+    </div>
+
+<!-- Toast Stack -->
     <div class="toast-stack" id="toast-stack"></div>
 
     <!-- Anonymous Banner -->

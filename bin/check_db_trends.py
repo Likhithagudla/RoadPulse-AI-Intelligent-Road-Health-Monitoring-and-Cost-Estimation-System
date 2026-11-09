@@ -1,8 +1,9 @@
+from pathlib import Path
 import sqlite3
 import os
 from datetime import datetime, timedelta
 
-db_path = 'D:/Road_AI_Project/backend/road_ai.db'
+db_path = str(Path(__file__).resolve().parent.parent / "backend/road_ai.db")
 if not os.path.exists(db_path):
     print(f"Database not found at {db_path}")
     sys.exit(1)

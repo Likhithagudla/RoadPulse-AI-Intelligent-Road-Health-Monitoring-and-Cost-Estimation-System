@@ -14,7 +14,7 @@ names:
   12: Guard_Rail
   13: Traffic_Sign
 nc: 14
-path: D:/Road_AI_Project/ai_models/dataset/unified
+path: C:/Users/likhi/Desktop/Road_AI_Project_Final/Road_AI_Project_Final/ai_models/dataset/unified
 test: images/test
 train: images/train
 val: images/val

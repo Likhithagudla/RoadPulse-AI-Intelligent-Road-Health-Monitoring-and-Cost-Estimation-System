@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: roadpulse_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - SECRET_KEY=${SECRET_KEY:-roadpulse_production_secure_key_8f3a2b7c9e1d4f6a0b2c4e6f8a1c3e}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=1440
+      - DATABASE_URL=sqlite:////app/backend/road_ai.db
+      # For PostgreSQL:
+      # - DATABASE_URL=postgresql://roadpulse:roadpulse_pass@postgres:5432/roadpulse_db
+      - DEFAULT_SOR_REGION=Default
+      - UPLOAD_DIR=/app/uploads
+      - DASHBOARD_DIR=/app/dashboard
+    volumes:
+      - uploads_data:/app/uploads
+      - db_data:/app/backend
+      - ./ai_models/weights:/app/ai_models/weights:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - roadpulse_net
+
+  # Production Database (Optional switch from SQLite)
+  postgres:
+    image: postgres:16-alpine
+    container_name: roadpulse_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: roadpulse
+      POSTGRES_PASSWORD: roadpulse_pass
+      POSTGRES_DB: roadpulse_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - roadpulse_net
+    profiles:
+      - with-postgres
+
+volumes:
+  uploads_data:
+  db_data:
+  pg_data:
+
+networks:
+  roadpulse_net:
+    driver: bridge

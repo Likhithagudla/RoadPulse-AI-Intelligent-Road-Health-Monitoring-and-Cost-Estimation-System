@@ -1,27 +1,37 @@
+"""
+RoadPulse AI - Sample Dataset Seeding Script
+Populates baseline road network inventory across 36 Indian states and UTs with synthetic defects.
+"""
 
-import os
 import sys
 import random
-from datetime import datetime
-from sqlalchemy.orm import Session
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Dict, Tuple
 
-# Add current dir to path for imports
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Add backend directory to path
+BACKEND_DIR = Path(__file__).resolve().parent
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
 
-import models
-import database
+from app.core.database import SessionLocal
+from app.models.defect import RoadDefect
+from app.models.road import Road
+from app.models.survey import Survey
 
-def seed():
-    db = database.SessionLocal()
+
+def seed() -> None:
+    """Seeds sample road assets, surveys, and defects across states."""
+    db = SessionLocal()
     try:
         # 1. Clear existing data
-        db.query(models.RoadDefect).delete()
-        db.query(models.Road).delete()
-        db.query(models.Survey).delete()
+        db.query(RoadDefect).delete()
+        db.query(Road).delete()
+        db.query(Survey).delete()
         db.commit()
 
         # States with rough central coordinates
-        states_data = {
+        states_data: Dict[str, Tuple[float, float]] = {
             "Andhra Pradesh": (15.9129, 79.7400),
             "Arunachal Pradesh": (28.2180, 94.7278),
             "Assam": (26.2006, 92.9376),
@@ -57,10 +67,13 @@ def seed():
             "Jammu and Kashmir": (33.7782, 76.5762),
             "Ladakh": (34.1526, 77.5771),
             "Lakshadweep": (10.5667, 72.6417),
-            "Puducherry": (11.9416, 79.8083)
+            "Puducherry": (11.9416, 79.8083),
         }
 
-        defect_types = ["pothole", "alligator_cracking", "edge_cracking", "rutting", "raveling", "repaired_pothole", "crack_repair"]
+        defect_types = [
+            "Pothole", "Alligator_Cracking", "Edge_Deterioration",
+            "Rutting", "Subsidence", "Repaired_Pothole", "Traffic_Sign"
+        ]
         severities = ["Low", "Medium", "High"]
 
         new_roads = []
@@ -68,53 +81,53 @@ def seed():
         new_defects = []
 
         road_types_list = ["NH", "SH", "VR"]
-        
+
         for idx, (state, (lat, lng)) in enumerate(states_data.items()):
             state_tag = state.replace(" ", "").upper()[:5]
-            
+
             for road_type in road_types_list:
                 road_id = f"RD-{state_tag}-{road_type}-{idx:02d}"
                 road_name = f"{state} {road_type} Road"
-                
-                road = models.Road(
+
+                road = Road(
                     road_id=road_id,
                     road_name=road_name,
                     road_type=road_type,
                     district="Main District",
                     state=state,
-                    total_length_km=random.uniform(10, 100),
-                    overall_condition=random.choice(["Good", "Average", "Bad"])
+                    total_length_km=round(random.uniform(10, 100), 2),
+                    overall_condition=random.choice(["Good", "Average", "Bad"]),
                 )
                 new_roads.append(road)
-                
+
                 # Create a survey for this road
-                survey = models.Survey(
+                survey = Survey(
                     road_name=road_name,
                     surveyor_name="Auto Seeder",
-                    status="completed"
+                    status="completed",
                 )
                 new_surveys.append(survey)
                 db.add(survey)
-                db.flush() # To get the survey ID
+                db.flush()
 
                 # Add 2-3 defects per road type per state
                 count = random.randint(2, 3)
-                for i in range(count):
-                    # Spread markers slightly
+                for _ in range(count):
                     dlat = random.uniform(-0.1, 0.1)
                     dlng = random.uniform(-0.1, 0.1)
-                    
-                    defect = models.RoadDefect(
+
+                    defect = RoadDefect(
                         road_name=road_name,
                         state=state,
-                        latitude=lat + dlat,
-                        longitude=lng + dlng,
+                        latitude=round(lat + dlat, 6),
+                        longitude=round(lng + dlng, 6),
                         defect_type=random.choice(defect_types),
                         severity=random.choice(severities),
-                        confidence=random.uniform(0.7, 0.98),
-                        repair_cost=random.uniform(500, 5000),
+                        confidence=round(random.uniform(0.70, 0.98), 4),
+                        repair_cost=round(random.uniform(500, 5000), 2),
                         survey_id=survey.id,
-                        timestamp=datetime.utcnow()
+                        timestamp=datetime.now(timezone.utc),
+                        is_defect=True,
                     )
                     new_defects.append(defect)
 
@@ -122,15 +135,17 @@ def seed():
         db.add_all(new_defects)
         db.commit()
 
-        print("Successfully seeded sample data!")
+        print("[SUCCESS] Successfully seeded sample data!")
         print(f"Added {len(new_roads)} roads, {len(new_surveys)} surveys, and {len(new_defects)} defects.")
         print("Data added for all 36 Indian States and Union Territories.")
 
-    except Exception as e:
-        print(f"Error seeding data: {e}")
+    except Exception as exc:
+        print(f"[ERROR] Error seeding data: {exc}")
         db.rollback()
+        raise
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     seed()

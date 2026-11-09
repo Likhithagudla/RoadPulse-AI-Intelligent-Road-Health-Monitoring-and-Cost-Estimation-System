@@ -14,6 +14,9 @@ class AppProvider with ChangeNotifier {
   String? _username;
   String? get username => _username;
 
+  String? _role;
+  String? get role => _role;
+
   int? _currentSurveyId;
   int? get currentSurveyId => _currentSurveyId;
 
@@ -47,8 +50,10 @@ class AppProvider with ChangeNotifier {
     notifyListeners();
     try {
       final res = await _apiService.login(username, password);
-      if (res['token'] != null) {
+      final token = res['access_token'] ?? res['token'];
+      if (token != null) {
         _username = username;
+        _role = res['role'] ?? 'user';
         _isLoading = false;
         notifyListeners();
         return true;
@@ -168,9 +173,11 @@ class AppProvider with ChangeNotifier {
 
   void logout() {
     _username = null;
+    _role = null;
     _isScanning = false;
     _isPaused = false;
     _currentSurveyId = null;
+    ApiService.logout();
     notifyListeners();
   }
 

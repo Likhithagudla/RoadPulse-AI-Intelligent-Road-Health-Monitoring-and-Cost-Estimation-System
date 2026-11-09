@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 from kaggle.api.kaggle_api_extended import KaggleApi
 
-SAVE_PATH = "D:/Road_AI_Project/ai_models/dataset"
+SAVE_PATH = str(Path(__file__).resolve().parent.parent / "ai_models/dataset")
 os.makedirs(SAVE_PATH, exist_ok=True)
 
 api = KaggleApi()

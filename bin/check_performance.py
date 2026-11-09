@@ -1,8 +1,9 @@
+from pathlib import Path
 import os
 from ultralytics import YOLO
 import yaml
 
-ROOT = "D:/Road_AI_Project/ai_models"
+ROOT = str(Path(__file__).resolve().parent.parent / "ai_models")
 WEIGHTS = os.path.join(ROOT, "weights", "best.pt")
 TEST_IMAGES = os.path.join(ROOT, "dataset/unified/test/images")
 CONFIG = os.path.join(ROOT, "config.yaml")

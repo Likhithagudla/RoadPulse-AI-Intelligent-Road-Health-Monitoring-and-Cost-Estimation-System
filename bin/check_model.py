@@ -1,7 +1,8 @@
+from pathlib import Path
 import torch
 import os
 
-model_path = "D:/Road_AI_Project/ai_models/weights/best.pt"
+model_path = str(Path(__file__).resolve().parent.parent / "ai_models/weights/best.pt")
 if os.path.exists(model_path):
     try:
         data = torch.load(model_path, map_location='cpu', weights_only=False)

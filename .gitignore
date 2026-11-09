@@ -1,34 +1,102 @@
-# Python
+# ==============================================================================
+# RoadPulse AI – Git Ignore Specification
+# Prevents accidental commits of secrets, runtime credentials, local databases,
+# temporary caches, and heavy binary model weights.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. ENVIRONMENT VARIABLES & SECRETS (STRICT)
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.env
+*.pem
+*.key
+*.cert
+*.pfx
+secrets.*
+credentials.json
+
+# ------------------------------------------------------------------------------
+# 2. LOCAL DATABASES & MIGRATION ARTIFACTS
+# ------------------------------------------------------------------------------
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+road_ai.db
+backend/road_ai.db
+db_data/
+pg_data/
+
+# ------------------------------------------------------------------------------
+# 3. PYTHON RUNTIME & BYTECODE
+# ------------------------------------------------------------------------------
 __pycache__/
 *.py[cod]
 *$py.class
-venv/
+*.so
+.Python
 env/
-.env
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
 
-# Flutter/Dart
+# ------------------------------------------------------------------------------
+# 4. TESTING, COVERAGE & CACHES
+# ------------------------------------------------------------------------------
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.hypothesis/
+.ruff_cache/
+.mypy_cache/
+*.log
+
+# ------------------------------------------------------------------------------
+# 5. USER UPLOADS & RUNTIME ARTIFACTS
+# ------------------------------------------------------------------------------
+uploads/images/*
+uploads/videos/*
+uploads/annotated/*
+!uploads/.gitkeep
+!uploads/images/.gitkeep
+!uploads/videos/.gitkeep
+!uploads/annotated/.gitkeep
+temp_frames/
+temp_check_zip/
+runs/
+test_results/
+
+# ------------------------------------------------------------------------------
+# 6. FLUTTER & DART MOBILE CLIENT
+# ------------------------------------------------------------------------------
 .dart_tool/
 .packages
 .pub-cache/
 .pub/
-/build/
+build/
+mobile/build/
 .flutter-plugins
 .flutter-plugins-dependencies
-*.log
-*.sqlite
-
-# Application Specific
 *.apk
-uploads/
-temp_check_zip/
-temp_frames/
+*.aab
 
-# IDE / OS
+# ------------------------------------------------------------------------------
+# 7. IDE & OPERATING SYSTEM JUNK
+# ------------------------------------------------------------------------------
 .idea/
 .vscode/
+*.swp
+*.swo
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 .DS_Store
 Thumbs.db
+ehthumbs.db
